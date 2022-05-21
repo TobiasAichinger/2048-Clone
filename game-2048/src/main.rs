@@ -39,7 +39,7 @@ impl Tile {
 
 fn tile_system(
     mut commands: Commands,
-    mut query: Query<(&mut Transform, &Tile)>,
+    mut query: Query<(&mut Transform, &mut Tile)>,
     keyboard_input: ResMut<Input<KeyCode>>,
     asset_server: Res<AssetServer>
 ) {
@@ -48,7 +48,93 @@ fn tile_system(
     let mut x: i32 = 0;
     let mut y: i32 = 0;
     let mut test: Vec<Tile> = Vec::new();
+    let mut tiles: Vec<Tile> = Vec::new();
+
+    let mut position_free: bool = true;
+    let mut position_changed: bool = false;
+    let mut transform_x: f32 = OFFSET;
+    let mut transform_y: f32 = OFFSET;
+
+    // Get all tiles on the board
+    query.for_each( | (_, tile) | {
+        tiles.push(tile.clone());
+    });
+
+    // Move tiles up if W was pressed
     if keyboard_input.just_released(KeyCode::W) {
+        query.for_each_mut( | (mut transforming_tile, mut tile) | {
+            position_changed = false;
+            position_free = true;
+            info!("Starting tile: {:?}", tile);
+
+            while position_free {
+                for idx in 0..tiles.len() {
+                    if tiles[idx].pos == tile.pos {
+                        continue;
+                    }
+    
+                    if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0
+                    || tile.pos.1 + 1 > 3 { // Check if one position above is free
+                        position_free = false;
+                    }
+                }
+    
+                if position_free {
+                    tile.pos.1 += 1;
+                    position_changed = true;
+                }
+            }
+    
+            if position_changed {
+                transform_x += tile.pos.0 as f32 * SQUARE_SIZE;
+                transform_y += tile.pos.1 as f32 * SQUARE_SIZE;
+        
+                transforming_tile.translation = Vec3::new(transform_x, transform_y, 1.0);
+            }
+
+            info!("Out tile: {:?}", tile);
+            info!("-------------------");
+        });
+    }   
+
+    // Move tiles right if D was pressed
+    if keyboard_input.just_released(KeyCode::D) {
+        query.for_each_mut( | (mut transforming_tile, mut tile) | {
+            position_changed = false;
+            position_free = true;
+            info!("Starting tile: {:?}", tile);
+
+            while position_free {
+                for idx in 0..tiles.len() {
+                    if tiles[idx].pos == tile.pos {
+                        continue;
+                    }
+    
+                    if tile.pos.0 + 1 == tiles[idx].pos.0 && tile.pos.1 == tiles[idx].pos.1
+                    || tile.pos.0 + 1 > 3 { // Check if one position above is free
+                        position_free = false;
+                    }
+                }
+    
+                if position_free {
+                    tile.pos.0 += 1;
+                    position_changed = true;
+                }
+            }
+    
+            if position_changed {
+                transform_x += tile.pos.0 as f32 * SQUARE_SIZE;
+                transform_y += tile.pos.1 as f32 * SQUARE_SIZE;
+        
+                transforming_tile.translation = Vec3::new(transform_x, transform_y, 1.0);
+            }
+
+            info!("Out tile: {:?}", tile);
+            info!("-------------------");
+        });
+    }   
+
+    if position_changed || tiles.len() == 0 {
         while position_taken {
             position_taken = false;
             if !first_check {
@@ -89,14 +175,11 @@ fn tile_system(
             ..default()
         })
         .insert(Tile::new(2, (x, y)));
+    }
 
-        query.for_each_mut( | (tile_transform, to_clone) | {
-            test.push(to_clone.clone());
-    
-            
-            info!("{:?}", test);
-        });
-    }    
+    if keyboard_input.just_released(KeyCode::I) {
+        info!("{:?}", tiles);
+    }   
 }
 
 /*
