@@ -24,15 +24,7 @@ fn main() {
 
 #[derive(Component)]
 struct Square;
-
-
-/*
-fn random_number(min: i32, max: i32) -> i32 {
-    let mut rng = thread_rng;
-    rng.gen_range(min..max)
-}
-*/
-
+// Placing the 4 x 4 board on the screen
 fn setup(
     mut commands: Commands,
 ) {
