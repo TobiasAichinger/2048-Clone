@@ -26,7 +26,7 @@ impl Plugin for TilePlugin {
 
 pub fn tile_system(
     mut commands: Commands,
-    mut query: Query<(&mut Transform, &mut Tile)>,
+    mut query: Query<(Entity, &mut Transform, &mut Tile)>,
     keyboard_input: ResMut<Input<KeyCode>>,
     asset_server: Res<AssetServer>
 ) {
@@ -44,13 +44,13 @@ pub fn tile_system(
     let mut transform_y: f32 = super::OFFSET;
 
     // Get all tiles on the board
-    query.for_each( | (_, tile) | {
+    query.for_each( | ( _, _, tile) | {
         tiles.push(tile.clone());
     });
 
     // Move tiles up if W was pressed
     if keyboard_input.just_released(KeyCode::W) {
-        query.for_each_mut( | (mut transforming_tile, mut tile) | {
+        query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
             position_changed = false;
             position_free = true;
             info!("Starting tile: {:?}", tile);
@@ -59,6 +59,10 @@ pub fn tile_system(
                 for idx in 0..tiles.len() {
                     if tiles[idx].pos == tile.pos {
                         continue;
+                    }
+
+                    if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0 && tile.num == tiles[idx].num {
+                        commands.entity(entity).despawn_recursive();
                     }
     
                     if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0
@@ -87,7 +91,7 @@ pub fn tile_system(
     
     // Move tiles down if S was pressed
     if keyboard_input.just_released(KeyCode::S) {
-        query.for_each_mut( | (mut transforming_tile, mut tile) | {
+        query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
             position_changed = false;
             position_free = true;
             info!("Starting tile: {:?}", tile);
@@ -98,8 +102,11 @@ pub fn tile_system(
                         continue;
                     }
 
-                    if tile.pos.1 - 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0
-                    || tile.pos.1 - 1 < -1 { // Check if one position above is free
+
+                    if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0 && tile.num == tiles[idx].num {
+                        commands.entity(entity).despawn_recursive();
+                    } else if tile.pos.1 - 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0
+                    || tile.pos.1 - 1 <= -1 { // Check if one position above is free
                         position_free = false;
                     }
                 }
@@ -124,7 +131,7 @@ pub fn tile_system(
 
     // Move tiles right if D was pressed
     if keyboard_input.just_released(KeyCode::D) {
-        query.for_each_mut( | (mut transforming_tile, mut tile) | {
+        query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
             position_changed = false;
             position_free = true;
             info!("Starting tile: {:?}", tile);
@@ -135,7 +142,10 @@ pub fn tile_system(
                         continue;
                     }
     
-                    if tile.pos.0 + 1 == tiles[idx].pos.0 && tile.pos.1 == tiles[idx].pos.1
+
+                    if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0 && tile.num == tiles[idx].num {
+                        commands.entity(entity).despawn_recursive();
+                    } else if tile.pos.0 + 1 == tiles[idx].pos.0 && tile.pos.1 == tiles[idx].pos.1
                     || tile.pos.0 + 1 > 3 { // Check if one position above is free
                         position_free = false;
                     }
@@ -161,7 +171,7 @@ pub fn tile_system(
 
     // Move tiles left if A was pressed
     if keyboard_input.just_released(KeyCode::A) {
-        query.for_each_mut( | (mut transforming_tile, mut tile) | {
+        query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
             position_changed = false;
             position_free = true;
             info!("Starting tile: {:?}", tile);
@@ -171,9 +181,11 @@ pub fn tile_system(
                     if tiles[idx].pos == tile.pos {
                         continue;
                     }
-    
-                    if tile.pos.0 - 1 == tiles[idx].pos.0 && tile.pos.1 == tiles[idx].pos.1
-                    || tile.pos.0 - 1 < -1 { // Check if one position above is free
+
+                    if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0 && tile.num == tiles[idx].num {
+                        commands.entity(entity).despawn_recursive();
+                    } else if tile.pos.0 - 1 == tiles[idx].pos.0 && tile.pos.1 == tiles[idx].pos.1
+                    || tile.pos.0 - 1 <= -1 { // Check if one position above is free
                         position_free = false;
                     }
                 }
@@ -214,7 +226,7 @@ pub fn tile_system(
                 first_check = false;
             }
     
-            query.for_each( | (_, tile) | {
+            query.for_each( | (_, _, tile) | {
                 if x == tile.pos.0 && y == tile.pos.1 {
                     position_taken = true;
                 }
