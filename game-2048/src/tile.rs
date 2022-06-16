@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 
+const BOARD_SIZE: usize = 4;
+
 pub struct TilePlugin;
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct Tile {
     num: i32,
     pos: (i32, i32)
@@ -236,47 +238,48 @@ pub fn tile_system(
     }
 
     if keyboard_input.just_released(KeyCode::I) {
-        println!("{:?}", sort(&tiles));
+        let arr = sort(&tiles);
+
+        for i in 0..arr.len() {
+            for j in 0..arr[i].len() {
+                print!("{:?}", arr[i][j]);
+            }
+            println!()
+        }
+
+        println!();
     }   
 }
 
-fn sort(tiles: &Vec<Tile>) -> Vec<Tile> {
-    let mut sorted: Vec<Tile> = Vec::new();
-    let mut rows: Vec<Vec<Tile>> = Vec::new();
+fn sort(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
+    let mut sorted: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (-1, -1)); BOARD_SIZE]; BOARD_SIZE];
 
-    for i in 0..4 {
-        let mut row: Vec<Tile> = Vec::new();
-        for tile in tiles {
-            if tile.pos.1  == i{
-                row.push(tile.clone());
-            }
-        }
-
-        rows.push(row);
-    }
-
-    for row in &mut rows {
-        let mut col: Vec<Tile> = Vec::new();
-        for x in 0..4 {
-            for tile in row.clone() {
-                if tile.pos.0 == x {
-                    col.push(tile);
-                }
-            }
-        }
-
-        for elem in col {
-            sorted.push(elem);
-        }
+    for tile in tiles {
+        sorted[tile.pos.0 as usize][tile.pos.1 as usize] = *tile;
     }
 
     sorted
 }
 
-fn smash(tiles: &mut Vec<Tile>, direction: u8) {
+fn merge(tiles: &mut Vec<Vec<Tile>>, direction: u8) {
+    let mut merged: Vec<Vec<Tile>> = Vec::new();
+
     match direction {
         0 => {
+            let mut blocked: bool = false;
+            let mut idx: usize = 1;
 
+            for i in 1..tiles.len() {
+                for j in 0..tiles[tiles.len() - i - 1].len() {
+                    while !blocked {
+                        if idx <= i {
+
+                        } else {
+                            blocked = true;
+                        }
+                    }
+                } 
+            }
         },
         1 => {
 
