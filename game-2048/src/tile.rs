@@ -238,7 +238,9 @@ pub fn tile_system(
     }
 
     if keyboard_input.just_released(KeyCode::I) {
-        let arr = sort(&tiles);
+        let mut arr = sort(&tiles);
+
+        merge(&mut arr, 0);
 
         for i in 0..arr.len() {
             for j in 0..arr[i].len() {
@@ -261,22 +263,37 @@ fn sort(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
     sorted
 }
 
-fn merge(tiles: &mut Vec<Vec<Tile>>, direction: u8) {
-    let mut merged: Vec<Vec<Tile>> = Vec::new();
+fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
+    let mut merged: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (-1, -1)); BOARD_SIZE]; BOARD_SIZE];
 
     match direction {
         0 => {
-            let mut blocked: bool = false;
             let mut idx: usize = 1;
 
-            for i in 1..tiles.len() {
-                for j in 0..tiles[tiles.len() - i - 1].len() {
-                    while !blocked {
-                        if idx <= i {
-
-                        } else {
-                            blocked = true;
+            for i in 0..tiles.len() {
+                for j in 0..tiles[i].len() {
+                    if tiles[i][j].num != 0 && i != 0 {
+                        while tiles[i - idx][j].num == 0 {
+                            if idx < i {
+                                idx += 1;
+                            } else {
+                                break;
+                            }
                         }
+
+                        println!("{:?}     -     {:?}", tiles[i][j], tiles[i - idx][j]);
+
+                        if i != i - idx && tiles[i - idx][j].num == tiles[i][j].num {
+                            tiles[i - idx][j].num = tiles[i][j].num;
+                            tiles[i- idx][j].num *= 2;
+                            tiles[i][j].num = 0;
+                        } else {
+                            let num: i32 = tiles[i][j].num;
+                            tiles[i][j].num = 0;
+                            tiles[i - idx][j].num = num;
+                        }
+
+                        println!("{:?}     -     {:?}", tiles[i][j], tiles[i - idx][j]);
                     }
                 } 
             }
