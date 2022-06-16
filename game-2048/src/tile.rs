@@ -53,7 +53,6 @@ pub fn tile_system(
         query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
             position_changed = false;
             position_free = true;
-            info!("Starting tile: {:?}", tile);
 
             while position_free {
                 for idx in 0..tiles.len() {
@@ -83,9 +82,6 @@ pub fn tile_system(
         
                 transforming_tile.translation = Vec3::new(transform_x, transform_y, 1.0);
             }
-
-            info!("Out tile: {:?}", tile);
-            info!("-------------------");
         });
     }   
     
@@ -94,7 +90,6 @@ pub fn tile_system(
         query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
             position_changed = false;
             position_free = true;
-            info!("Starting tile: {:?}", tile);
 
             while position_free {
                 for idx in 0..tiles.len() {
@@ -123,9 +118,6 @@ pub fn tile_system(
         
                 transforming_tile.translation = Vec3::new(transform_x, transform_y, 1.0);
             }
-
-            info!("Out tile: {:?}", tile);
-            info!("-------------------");
         });
     } 
 
@@ -134,7 +126,6 @@ pub fn tile_system(
         query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
             position_changed = false;
             position_free = true;
-            info!("Starting tile: {:?}", tile);
 
             while position_free {
                 for idx in 0..tiles.len() {
@@ -163,9 +154,6 @@ pub fn tile_system(
         
                 transforming_tile.translation = Vec3::new(transform_x, transform_y, 1.0);
             }
-
-            info!("Out tile: {:?}", tile);
-            info!("-------------------");
         });
     }   
 
@@ -174,7 +162,6 @@ pub fn tile_system(
         query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
             position_changed = false;
             position_free = true;
-            info!("Starting tile: {:?}", tile);
 
             while position_free {
                 for idx in 0..tiles.len() {
@@ -202,9 +189,6 @@ pub fn tile_system(
         
                 transforming_tile.translation = Vec3::new(transform_x, transform_y, 1.0);
             }
-
-            info!("Out tile: {:?}", tile);
-            info!("-------------------");
         });
     }  
 
@@ -252,6 +236,56 @@ pub fn tile_system(
     }
 
     if keyboard_input.just_released(KeyCode::I) {
-        info!("{:?}", tiles);
+        println!("{:?}", sort(&tiles));
     }   
+}
+
+fn sort(tiles: &Vec<Tile>) -> Vec<Tile> {
+    let mut sorted: Vec<Tile> = Vec::new();
+    let mut rows: Vec<Vec<Tile>> = Vec::new();
+
+    for i in 0..4 {
+        let mut row: Vec<Tile> = Vec::new();
+        for tile in tiles {
+            if tile.pos.1  == i{
+                row.push(tile.clone());
+            }
+        }
+
+        rows.push(row);
+    }
+
+    for row in &mut rows {
+        let mut col: Vec<Tile> = Vec::new();
+        for x in 0..4 {
+            for tile in row.clone() {
+                if tile.pos.0 == x {
+                    col.push(tile);
+                }
+            }
+        }
+
+        for elem in col {
+            sorted.push(elem);
+        }
+    }
+
+    sorted
+}
+
+fn smash(tiles: &mut Vec<Tile>, direction: u8) {
+    match direction {
+        0 => {
+
+        },
+        1 => {
+
+        },
+        2 => {
+
+        },
+        _ => {
+
+        }
+    }
 }
