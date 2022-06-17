@@ -52,39 +52,6 @@ pub fn tile_system(
 
     // Move tiles up if W was pressed
     if keyboard_input.just_released(KeyCode::W) {
-        query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
-            position_changed = false;
-            position_free = true;
-
-            while position_free {
-                for idx in 0..tiles.len() {
-                    if tiles[idx].pos == tile.pos {
-                        continue;
-                    }
-
-                    if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0 && tile.num == tiles[idx].num {
-                        commands.entity(entity).despawn_recursive();
-                    }
-    
-                    if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0
-                    || tile.pos.1 + 1 > 3 { // Check if one position above is free
-                        position_free = false;
-                    }
-                }
-    
-                if position_free {
-                    tile.pos.1 += 1;
-                    position_changed = true;
-                }
-            }
-    
-            if position_changed {
-                transform_x += tile.pos.0 as f32 * super::SQUARE_SIZE;
-                transform_y += tile.pos.1 as f32 * super::SQUARE_SIZE;
-        
-                transforming_tile.translation = Vec3::new(transform_x, transform_y, 1.0);
-            }
-        });
     }   
     
     // Move tiles down if S was pressed
@@ -125,39 +92,37 @@ pub fn tile_system(
 
     // Move tiles right if D was pressed
     if keyboard_input.just_released(KeyCode::D) {
-        query.for_each_mut( | (entity, mut transforming_tile, mut tile) | {
-            position_changed = false;
-            position_free = true;
-
-            while position_free {
-                for idx in 0..tiles.len() {
-                    if tiles[idx].pos == tile.pos {
-                        continue;
-                    }
-    
-
-                    if tile.pos.1 + 1 == tiles[idx].pos.1 && tile.pos.0 == tiles[idx].pos.0 && tile.num == tiles[idx].num {
-                        commands.entity(entity).despawn_recursive();
-                    } else if tile.pos.0 + 1 == tiles[idx].pos.0 && tile.pos.1 == tiles[idx].pos.1
-                    || tile.pos.0 + 1 > 3 { // Check if one position above is free
-                        position_free = false;
-                    }
-                }
-    
-                if position_free {
-                    tile.pos.0 += 1;
-                    position_changed = true;
-                }
-            }
-    
-            if position_changed {
-                transform_x += tile.pos.0 as f32 * super::SQUARE_SIZE;
-                transform_y += tile.pos.1 as f32 * super::SQUARE_SIZE;
-        
-                transforming_tile.translation = Vec3::new(transform_x, transform_y, 1.0);
-            }
+        query.for_each(|(entity, _, _)| {
+            commands.entity(entity).despawn_recursive();
         });
-    }   
+
+        let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+
+        merge(&mut matrix, 3);
+
+        for i in 0..matrix.len() {
+            for j in 0..matrix[i].len() {
+                if matrix[i][j].num != 0 {
+                    let tile_position = Vec2::new(
+                        super::OFFSET + matrix[i][j].pos.0 as f32 * (super::SQUARE_SIZE),
+                        super::OFFSET + matrix[i][j].pos.1 as f32 * (super::SQUARE_SIZE),
+                    );   
+    
+                    commands
+                    .spawn_bundle(SpriteBundle {
+                        texture: asset_server.load(&(matrix[i][j].num.to_string() + ".png")),
+                        transform: Transform {
+                            translation: tile_position.extend(1.0),
+                            scale: Vec3::new(0.3, 0.3, 1.0),
+                            ..default()
+                        },
+                        ..default()
+                    })
+                    .insert(Tile::new(matrix[i][j].num, (x, y)));
+                }
+            }
+        }
+    }
 
     // Move tiles left if A was pressed
     if keyboard_input.just_released(KeyCode::A) {
@@ -226,7 +191,7 @@ pub fn tile_system(
 
         commands
         .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("two.png"),
+            texture: asset_server.load("2.png"),
             transform: Transform {
                 translation: tile_position.extend(1.0),
                 scale: Vec3::new(0.3, 0.3, 1.0),
@@ -238,7 +203,7 @@ pub fn tile_system(
     }
 
     if keyboard_input.just_released(KeyCode::I) {
-        let mut arr = sort(&tiles);
+        let mut arr = get_matrix(&tiles);
 
         merge(&mut arr, 0);
 
@@ -250,9 +215,10 @@ pub fn tile_system(
         }
 
         println!();
-    }   
+    }
 }
-fn sort(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
+
+fn get_matrix(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
     let mut sorted: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (0, 0)); BOARD_SIZE]; BOARD_SIZE];
 
     for tile in tiles {
@@ -265,6 +231,14 @@ fn sort(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
 fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
     match direction {
         0 => {
+        },
+        1 => {
+
+        },
+        2 => {
+
+        },
+        _ => {
             let mut idx: usize = 0;
 
             // Push together
@@ -329,15 +303,6 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
             }
 
             set_position(tiles);
-        },
-        1 => {
-
-        },
-        2 => {
-
-        },
-        _ => {
-
         }
     }
 }
