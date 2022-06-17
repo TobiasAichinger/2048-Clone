@@ -252,9 +252,8 @@ pub fn tile_system(
         println!();
     }   
 }
-
 fn sort(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
-    let mut sorted: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (-1, -1)); BOARD_SIZE]; BOARD_SIZE];
+    let mut sorted: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (0, 0)); BOARD_SIZE]; BOARD_SIZE];
 
     for tile in tiles {
         sorted[tile.pos.0 as usize][tile.pos.1 as usize] = *tile;
@@ -264,39 +263,72 @@ fn sort(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
 }
 
 fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
-    let mut merged: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (-1, -1)); BOARD_SIZE]; BOARD_SIZE];
-
     match direction {
         0 => {
-            let mut idx: usize = 1;
+            let mut idx: usize = 0;
 
-            for i in 0..tiles.len() {
+            // Push together
+
+            for i in 1..tiles.len() {
                 for j in 0..tiles[i].len() {
-                    if tiles[i][j].num != 0 && i != 0 {
-                        while tiles[i - idx][j].num == 0 {
-                            if idx < i {
+                    if tiles[i][j].num != 0 {
+                        while tiles[i - (idx + 1)][j].num == 0 {
+                            if idx < i - 1 {
                                 idx += 1;
                             } else {
+                                idx += 1;
                                 break;
                             }
                         }
 
-                        println!("{:?}     -     {:?}", tiles[i][j], tiles[i - idx][j]);
-
-                        if i != i - idx && tiles[i - idx][j].num == tiles[i][j].num {
+                        if i != i - idx {
                             tiles[i - idx][j].num = tiles[i][j].num;
-                            tiles[i- idx][j].num *= 2;
                             tiles[i][j].num = 0;
-                        } else {
-                            let num: i32 = tiles[i][j].num;
-                            tiles[i][j].num = 0;
-                            tiles[i - idx][j].num = num;
                         }
+                    }
 
-                        println!("{:?}     -     {:?}", tiles[i][j], tiles[i - idx][j]);
+                    idx = 0;
+                }
+            }
+
+            // Merge everything next to each other together
+
+            for i in 1..tiles.len() {
+                for j in 0..tiles[i].len() {
+                    if tiles[i][j].num != 0 && i != 0 {
+                        if tiles[i][j].num == tiles[i - 1][j].num {
+                            tiles[i - 1][j].num *= 2;
+                            tiles[i][j].num = 0;
+                        }
                     }
                 } 
             }
+
+            // Push everything together again
+
+            for i in 1..tiles.len() {
+                for j in 0..tiles[i].len() {
+                    if tiles[i][j].num != 0 {
+                        while tiles[i - (idx + 1)][j].num == 0 {
+                            if idx < i - 1 {
+                                idx += 1;
+                            } else {
+                                idx += 1;
+                                break;
+                            }
+                        }
+
+                        if i != i - idx {
+                            tiles[i - idx][j].num = tiles[i][j].num;
+                            tiles[i][j].num = 0;
+                        }
+                    }
+
+                    idx = 0;
+                }
+            }
+
+            set_position(tiles);
         },
         1 => {
 
@@ -306,6 +338,15 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
         },
         _ => {
 
+        }
+    }
+}
+
+fn set_position(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE]) {
+    for i in 0..tiles.len() {
+        for j in 0..tiles[i].len() {
+            tiles[i][j].pos.0 = i as i32;
+            tiles[i][j].pos.1 = j as i32;            
         }
     }
 }
