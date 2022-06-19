@@ -188,7 +188,7 @@ pub fn tile_system(
 
         commands
         .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("4.png"),
+            texture: asset_server.load("128.png"),
             transform: Transform {
                 translation: tile_position.extend(1.0),
                 scale: Vec3::new(0.3, 0.3, 1.0),
@@ -196,7 +196,7 @@ pub fn tile_system(
             },
             ..default()
         })
-        .insert(Tile::new(4, (0, 0)));
+        .insert(Tile::new(128, (0, 0)));
 
         tile_position = Vec2::new(
             super::OFFSET + 3 as f32 * (super::SQUARE_SIZE),
@@ -205,7 +205,7 @@ pub fn tile_system(
 
         commands
         .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("4.png"),
+            texture: asset_server.load("128.png"),
             transform: Transform {
                 translation: tile_position.extend(1.0),
                 scale: Vec3::new(0.3, 0.3, 1.0),
@@ -213,7 +213,7 @@ pub fn tile_system(
             },
             ..default()
         })
-        .insert(Tile::new(4, (3, 3)));
+        .insert(Tile::new(128, (3, 3)));
     }
 
     if keyboard_input.just_released(KeyCode::I) {
@@ -245,17 +245,8 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
     let mut idx: usize = 0;
     
     match direction {
-        0 => { // bottom to top
+        0 => { // left to right
             // Push together
-
-            for i in 0..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    print!("{:?}", tiles[i][j]);
-                }
-                println!()
-            }
-    
-            println!("-------------------------------------------------");
 
             for i in 1..tiles.len() {
                 for j in 0..tiles[i].len() {
@@ -279,16 +270,6 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
                 }
             }
 
-            for i in 0..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    print!("{:?}", tiles[i][j]);
-                }
-                println!()
-            }
-    
-            println!("-------------------------------------------------");
-
-
             // Merge everything next to each other together
 
             for i in 1..tiles.len() {
@@ -301,15 +282,6 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
                     }
                 } 
             }
-
-            for i in 0..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    print!("{:?}", tiles[i][j]);
-                }
-                println!()
-            }
-    
-            println!("-------------------------------------------------");
 
             // Push everything together again
 
@@ -336,17 +308,8 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
             }
 
             set_position(tiles);
-
-            for i in 0..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    print!("{:?}", tiles[i][j]);
-                }
-                println!()
-            }
-    
-            println!("-------------------------------------------------");
         },
-        1 => { // top to bottom
+        1 => { // right to left
             // Push together
 
             for i in 1..tiles.len() {
@@ -408,7 +371,7 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
 
             set_position(tiles);
         },
-        2 => { // right to left
+        2 => { // bottom to top
             // Push together
             for i in 0..tiles.len() {
                 for j in 0..tiles[i].len() - 1 {
