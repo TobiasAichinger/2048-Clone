@@ -10,4 +10,4 @@ This game was made just for fun, I've written it in rust using the bevy game eng
 
 ## How it looks like
 
-<img src="demo/demo_picture.png" width="240" height="180" boarder="10" />
+<img src="demo/demo-picture.png" width="240" height="180" boarder="10" />
