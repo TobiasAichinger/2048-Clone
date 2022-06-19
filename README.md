@@ -10,4 +10,16 @@ This game was made just for fun, I've written it in rust using the bevy game eng
 
 ## How it looks like
 
-<img src="demo/demo-picture.png" width="240" height="180" boarder="10" />
+<img src="demo/demo-picture.png" />
+
+## How to use it
+
+Short explanation.
+
+1. clone this project
+2. install rust from the official <a href="https://www.rust-lang.org/" traget="site">
+3. you start it with `cargo run`, after that you can just play with W, A, S or D or the arrow keys
+
+## Found a bug?
+
+If you found a bug while playing the game it would be nice to create an Issue so I can fix it.
