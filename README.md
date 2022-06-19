@@ -17,7 +17,7 @@ This game was made just for fun, I've written it in rust using the bevy game eng
 Short explanation.
 
 1. clone this project
-2. install rust from the official <a href="https://www.rust-lang.org/" traget="site">
+2. <a href="https://www.rust-lang.org/" traget="_blank"> install rust from the official site
 3. you start it with `cargo run`, after that you can just play with W, A, S or D or the arrow keys
 
 ## Found a bug?
