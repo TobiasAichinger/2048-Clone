@@ -41,7 +41,7 @@ pub fn tile_system(
     });
 
     // Move tiles up if W was pressed
-    if keyboard_input.just_released(KeyCode::W) {
+    if keyboard_input.just_released(KeyCode::Up) || keyboard_input.just_released(KeyCode::W) {
         // Removes all entitys
         query.for_each(|(entity, _, _)| {
             commands.entity(entity).despawn_recursive();
@@ -76,7 +76,7 @@ pub fn tile_system(
     }   
     
     // Move tiles down if S was pressed
-    if keyboard_input.just_released(KeyCode::S) {
+    if keyboard_input.just_released(KeyCode::Down) || keyboard_input.just_released(KeyCode::S) {
         // Removes all entitys
         query.for_each(|(entity, _, _)| {
             commands.entity(entity).despawn_recursive();
@@ -111,7 +111,7 @@ pub fn tile_system(
     } 
 
     // Move tiles right if D was pressed
-    if keyboard_input.just_released(KeyCode::D) {
+    if keyboard_input.just_released(KeyCode::Right) || keyboard_input.just_released(KeyCode::D) {
         // Removes all entitys
         query.for_each(|(entity, _, _)| {
             commands.entity(entity).despawn_recursive();
@@ -146,7 +146,7 @@ pub fn tile_system(
     }
 
     // Move tiles left if A was pressed
-    if keyboard_input.just_released(KeyCode::A) {
+    if keyboard_input.just_released(KeyCode::Left) || keyboard_input.just_released(KeyCode::A) {
         // Removes all entitys
         query.for_each(|(entity, _, _)| {
             commands.entity(entity).despawn_recursive();
@@ -188,7 +188,7 @@ pub fn tile_system(
 
         commands
         .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("128.png"),
+            texture: asset_server.load("2.png"),
             transform: Transform {
                 translation: tile_position.extend(1.0),
                 scale: Vec3::new(0.3, 0.3, 1.0),
@@ -205,7 +205,7 @@ pub fn tile_system(
 
         commands
         .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("128.png"),
+            texture: asset_server.load("2.png"),
             transform: Transform {
                 translation: tile_position.extend(1.0),
                 scale: Vec3::new(0.3, 0.3, 1.0),
