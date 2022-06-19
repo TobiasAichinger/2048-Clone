@@ -18,7 +18,7 @@ Short explanation.
 
 1. clone this project
 2. install rust from the official<a href="https://www.rust-lang.org/" traget="_blank"> rust-lang site <a/>
-3. you start it with `cargo run`, after that you can just play with W, A, S or D or the arrow keys
+3. you start it with `cargo run --release`, after that you can just play with W, A, S or D or the arrow keys
 
 ## Found a bug?
 
