@@ -35,7 +35,6 @@ pub fn tile_system(
 ) {
     // Variable to store if a new tile needs to be spawned
     let mut new_tile: bool = false;
-    let mut rng = rand::thread_rng();
 
     // Variables for position and move detection
     let mut tiles: Vec<Tile> = Vec::new();
@@ -199,17 +198,77 @@ pub fn tile_system(
 
     if tiles.len() == 0 || new_tile {
         let mut positions: Vec<(i32, i32)> = Vec::new();
+        let mut rng = rand::thread_rng();
+
+        tiles.clear();
+
+        query.for_each( | ( _, _, tile) | {
+            tiles.push(tile.clone());
+        });
+
+        let mut arr: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+
+        for i in 0..arr.len() {
+            for j in 0..arr[i].len() {
+                if arr[i][j].num == 0 {
+                    positions.push(arr[i][j].pos);
+                }
+            }
+        }
+        
+        if positions.len() > 0 {
+            let idx: usize = rng.gen_range(0..positions.len());
+
+            if rng.gen_range(0..10) == 9 {
+                let tile_position = Vec2::new(
+                    super::OFFSET + positions[idx].0  as f32 * (super::SQUARE_SIZE),
+                    super::OFFSET + positions[idx].1 as f32 * (super::SQUARE_SIZE),
+                );   
+    
+                commands
+                .spawn_bundle(SpriteBundle {
+                    texture: asset_server.load("4.png"),
+                    transform: Transform {
+                        translation: tile_position.extend(1.0),
+                        scale: Vec3::new(0.3, 0.3, 1.0),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .insert(Tile::new(4, (positions[idx].1, positions[idx].0)));
+            } else {
+                let tile_position = Vec2::new(
+                    super::OFFSET + positions[idx].0  as f32 * (super::SQUARE_SIZE),
+                    super::OFFSET + positions[idx].1 as f32 * (super::SQUARE_SIZE),
+                );   
+    
+                commands
+                .spawn_bundle(SpriteBundle {
+                    texture: asset_server.load("2.png"),
+                    transform: Transform {
+                        translation: tile_position.extend(1.0),
+                        scale: Vec3::new(0.3, 0.3, 1.0),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .insert(Tile::new(2, (positions[idx].1, positions[idx].0)));
+            }
+    
+            drop(rng);
+        }
     }
 }
 
 fn get_matrix(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
-    let mut sorted: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (0, 0)); BOARD_SIZE]; BOARD_SIZE];
+    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (0, 0)); BOARD_SIZE]; BOARD_SIZE];
 
     for tile in tiles {
-        sorted[tile.pos.1 as usize][tile.pos.0 as usize] = *tile;
+        matrix[tile.pos.1 as usize][tile.pos.0 as usize] = *tile;
     }
 
-    sorted
+    set_position(&mut matrix);
+    matrix
 }
 
 fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
