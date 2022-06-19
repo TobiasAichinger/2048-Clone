@@ -432,8 +432,67 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
 
             set_position(tiles);
         },
-        _ => {
-            
+        _ => { // top to bottom
+            // Push everything together
+
+            for i in 0..tiles.len() {
+                for j in 1..tiles[i].len() {
+                    if tiles[i][j].num != 0 {
+                        while tiles[i][j - (idx + 1)].num == 0 {
+                            if idx < j - 1 {
+                                idx += 1;
+                            } else {
+                                idx += 1;
+                                break;
+                            }
+                        }
+
+                        if j != j + idx {
+                            tiles[i][j - idx].num = tiles[i][j].num;
+                            tiles[i][j].num = 0;
+                        }
+
+                        idx = 0;
+                    }
+                }
+            }
+
+            // Merge
+
+            for i in 0..tiles.len() {
+                for j in 1..tiles[i].len() {
+                    if tiles[i][j].num == tiles[i][j - 1].num {
+                        tiles[i][j - 1].num *= 2;
+                        tiles[i][j].num = 0;
+                    }
+                }
+            }
+
+            // Push together
+
+            for i in 0..tiles.len() {
+                for j in 1..tiles[i].len() {
+                    if tiles[i][j].num != 0 {
+                        while tiles[i][j - (idx + 1)].num == 0 {
+                            if idx < j - 1 {
+                                idx += 1;
+                            } else {
+                                idx += 1;
+                                break;
+                            }
+                        }
+
+                        if j != j + idx {
+                            tiles[i][j - idx].num = tiles[i][j].num;
+                            tiles[i][j].num = 0;
+                        }
+
+                        idx = 0;
+                    }
+                }
+            }
+
+            set_position(tiles);
         }
     }
 }
