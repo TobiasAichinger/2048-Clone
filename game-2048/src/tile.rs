@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rand::Rng;
 
 const BOARD_SIZE: usize = 4;
 
@@ -32,6 +33,10 @@ pub fn tile_system(
     keyboard_input: ResMut<Input<KeyCode>>,
     asset_server: Res<AssetServer>
 ) {
+    // Variable to store if a new tile needs to be spawned
+    let mut new_tile: bool = false;
+    let mut rng = rand::thread_rng();
+
     // Variables for position and move detection
     let mut tiles: Vec<Tile> = Vec::new();
 
@@ -46,6 +51,9 @@ pub fn tile_system(
         query.for_each(|(entity, _, _)| {
             commands.entity(entity).despawn_recursive();
         });
+
+        // Set new tile to true because the board was moved
+        new_tile = true;
 
         let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
 
@@ -82,6 +90,9 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
+        // Set new tile to true because the board was moved
+        new_tile = true;
+
         let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
 
         merge(&mut matrix, 3);
@@ -116,6 +127,9 @@ pub fn tile_system(
         query.for_each(|(entity, _, _)| {
             commands.entity(entity).despawn_recursive();
         });
+
+        // Set new tile to true because the board was moved
+        new_tile = true;
 
         let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
 
@@ -152,6 +166,9 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
+        // Set new tile to true because the board was moved
+        new_tile = true;
+
         let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
 
         merge(&mut matrix, 0);
@@ -180,54 +197,8 @@ pub fn tile_system(
         }
     }  
 
-    if tiles.len() == 0 {
-        let mut tile_position = Vec2::new(
-            super::OFFSET + 0 as f32 * (super::SQUARE_SIZE),
-            super::OFFSET + 0 as f32 * (super::SQUARE_SIZE),
-        );    
-
-        commands
-        .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("2.png"),
-            transform: Transform {
-                translation: tile_position.extend(1.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(Tile::new(128, (0, 0)));
-
-        tile_position = Vec2::new(
-            super::OFFSET + 3 as f32 * (super::SQUARE_SIZE),
-            super::OFFSET + 3 as f32 * (super::SQUARE_SIZE),
-        );    
-
-        commands
-        .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("2.png"),
-            transform: Transform {
-                translation: tile_position.extend(1.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(Tile::new(128, (3, 3)));
-    }
-
-    if keyboard_input.just_released(KeyCode::I) {
-        let mut arr = get_matrix(&tiles);
-        set_position(&mut arr);
-
-        for i in 0..arr.len() {
-            for j in 0..arr[i].len() {
-                print!("{:?}", arr[i][j]);
-            }
-            println!()
-        }
-
-        println!("-------------------------------------------------");
+    if tiles.len() == 0 || new_tile {
+        let mut positions: Vec<(i32, i32)> = Vec::new();
     }
 }
 
