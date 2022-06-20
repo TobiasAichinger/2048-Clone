@@ -51,12 +51,23 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
-        // Set new tile to true because the board was moved
-        new_tile = true;
-
         let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 2);
+
+        for i in 0..matrix.len() {
+            for j in 0..matrix[i].len() {
+                if matrix[i][j].num != matrix_clone[i][j].num {
+                    new_tile = true; 
+                    break;
+                }
+            }
+
+            if new_tile {
+                break;
+            }
+        }
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
@@ -89,12 +100,24 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
-        // Set new tile to true because the board was moved
-        new_tile = true;
 
         let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 3);
+
+        for i in 0..matrix.len() {
+            for j in 0..matrix[i].len() {
+                if matrix[i][j].num != matrix_clone[i][j].num {
+                    new_tile = true; 
+                    break;
+                }
+            }
+
+            if new_tile {
+                break;
+            }
+        }
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
@@ -127,12 +150,23 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
-        // Set new tile to true because the board was moved
-        new_tile = true;
-
         let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 1);
+
+        for i in 0..matrix.len() {
+            for j in 0..matrix[i].len() {
+                if matrix[i][j].num != matrix_clone[i][j].num {
+                    new_tile = true; 
+                    break;
+                }
+            }
+
+            if new_tile {
+                break;
+            }
+        }
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
@@ -165,12 +199,23 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
-        // Set new tile to true because the board was moved
-        new_tile = true;
-
         let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 0);
+
+        for i in 0..matrix.len() {
+            for j in 0..matrix[i].len() {
+                if matrix[i][j].num != matrix_clone[i][j].num {
+                    new_tile = true; 
+                    break;
+                }
+            }
+
+            if new_tile {
+                break;
+            }
+        }
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
