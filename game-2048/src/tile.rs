@@ -251,7 +251,7 @@ pub fn tile_system(
             tiles.push(tile.clone());
         });
 
-        let mut arr: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        let arr: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
 
         for i in 0..arr.len() {
             for j in 0..arr[i].len() {
