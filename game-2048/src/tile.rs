@@ -40,6 +40,9 @@ pub fn tile_system(
     // Variables for position and move detection
     let mut tiles: Vec<Tile> = Vec::new();
 
+    // Board
+    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (0, 0)); BOARD_SIZE]; BOARD_SIZE];
+
    // Get all tiles on the board
     query.for_each( | ( _, _, tile) | {
         tiles.push(tile.clone());
@@ -52,7 +55,7 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
-        let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        matrix = get_matrix(&tiles);
         let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 2);
@@ -92,7 +95,7 @@ pub fn tile_system(
         });
 
 
-        let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        matrix = get_matrix(&tiles);
         let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 3);
@@ -131,7 +134,7 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
-        let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        matrix = get_matrix(&tiles);
         let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 1);
@@ -170,7 +173,7 @@ pub fn tile_system(
             commands.entity(entity).despawn_recursive();
         });
 
-        let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
+        matrix = get_matrix(&tiles);
         let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 0);
@@ -205,10 +208,6 @@ pub fn tile_system(
     if new_tile || tiles.len() == 0 {
         let mut positions: Vec<(i32, i32)> = Vec::new();
         let mut rng = rand::thread_rng();
-
-        let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
-
-        merge(&mut matrix, dir);
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
