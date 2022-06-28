@@ -35,11 +35,12 @@ pub fn tile_system(
 ) {
     // Variable to store if a new tile needs to be spawned
     let mut new_tile: bool = false;
+    let mut dir: u8 = 4;
 
     // Variables for position and move detection
     let mut tiles: Vec<Tile> = Vec::new();
 
-    // Get all tiles on the board
+   // Get all tiles on the board
     query.for_each( | ( _, _, tile) | {
         tiles.push(tile.clone());
     });
@@ -55,19 +56,9 @@ pub fn tile_system(
         let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 2);
+        dir = 2;
 
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num != matrix_clone[i][j].num {
-                    new_tile = true; 
-                    break;
-                }
-            }
-
-            if new_tile {
-                break;
-            }
-        }
+        new_tile = check_set_new_tile(matrix, matrix_clone);
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
@@ -105,19 +96,9 @@ pub fn tile_system(
         let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 3);
+        dir = 3;
 
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num != matrix_clone[i][j].num {
-                    new_tile = true; 
-                    break;
-                }
-            }
-
-            if new_tile {
-                break;
-            }
-        }
+        new_tile = check_set_new_tile(matrix, matrix_clone);
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
@@ -154,19 +135,9 @@ pub fn tile_system(
         let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 1);
+        dir = 1;
 
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num != matrix_clone[i][j].num {
-                    new_tile = true; 
-                    break;
-                }
-            }
-
-            if new_tile {
-                break;
-            }
-        }
+        new_tile = check_set_new_tile(matrix, matrix_clone);
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
@@ -203,19 +174,9 @@ pub fn tile_system(
         let matrix_clone = matrix.clone();
 
         merge(&mut matrix, 0);
+        dir = 0;
 
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num != matrix_clone[i][j].num {
-                    new_tile = true; 
-                    break;
-                }
-            }
-
-            if new_tile {
-                break;
-            }
-        }
+        new_tile = check_set_new_tile(matrix, matrix_clone);
 
         for i in 0..matrix.len() {
             for j in 0..matrix[i].len() {
@@ -241,22 +202,18 @@ pub fn tile_system(
         }
     }  
 
-    if tiles.len() == 0 || new_tile {
+    if new_tile || tiles.len() == 0 {
         let mut positions: Vec<(i32, i32)> = Vec::new();
         let mut rng = rand::thread_rng();
 
-        tiles.clear();
+        let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
 
-        query.for_each( | ( _, _, tile) | {
-            tiles.push(tile.clone());
-        });
+        merge(&mut matrix, dir);
 
-        let arr: [[Tile; BOARD_SIZE]; BOARD_SIZE] = get_matrix(&tiles);
-
-        for i in 0..arr.len() {
-            for j in 0..arr[i].len() {
-                if arr[i][j].num == 0 {
-                    positions.push(arr[i][j].pos);
+        for i in 0..matrix.len() {
+            for j in 0..matrix[i].len() {
+                if matrix[i][j].num == 0 {
+                    positions.push(matrix[i][j].pos);
                 }
             }
         }
@@ -303,6 +260,18 @@ pub fn tile_system(
             drop(rng);
         }
     }
+}
+
+fn check_set_new_tile(matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE], matrix_clone: [[Tile; BOARD_SIZE]; BOARD_SIZE]) -> bool {
+    for i in 0..matrix.len() {
+        for j in 0..matrix[i].len() {
+            if matrix[i][j].num != matrix_clone[i][j].num {
+                return true; 
+            }
+        }
+    }
+
+    false
 }
 
 fn get_matrix(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
