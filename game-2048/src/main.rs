@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 mod tile;
 
+const BOARD: usize = 4;
+
 use tile::TilePlugin;
 
 const OFFSET: f32 = (-(4 as f32 / 2.0 * SQUARE_SIZE)) + SQUARE_SIZE / 2.;
@@ -30,8 +32,8 @@ fn setup(
 ) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
-    for row in 0..4 {
-        for col in 0..4 {
+    for row in 0..BOARD {
+        for col in 0..BOARD {
             let point_position = Vec2::new(
                 OFFSET + col as f32 * (SQUARE_SIZE),
                 OFFSET + row as f32 * (SQUARE_SIZE),

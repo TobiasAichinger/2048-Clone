@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-const BOARD_SIZE: usize = 4;
+const BOARD_SIZE: usize = super::BOARD;
 
 pub struct TilePlugin;
 
