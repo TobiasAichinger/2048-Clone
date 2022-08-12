@@ -5,6 +5,8 @@ mod score;
 mod states;
 mod menu;
 
+const BOARD: usize = 4;
+
 use tile::TilePlugin;
 use states::GameState;
 
@@ -33,8 +35,15 @@ struct Square;
 fn setup(
     mut commands: Commands,
 ) {
+<<<<<<< HEAD
     for row in 0..4 {
         for col in 0..4 {
+=======
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+
+    for row in 0..BOARD {
+        for col in 0..BOARD {
+>>>>>>> 837fe2cf14c0f1f651aa5abf63ccee777901bb8b
             let point_position = Vec2::new(
                 OFFSET + col as f32 * (SQUARE_SIZE),
                 OFFSET + row as f32 * (SQUARE_SIZE),
