@@ -5,6 +5,9 @@ const BOARD_SIZE: usize = super::BOARD;
 
 pub struct TilePlugin;
 
+#[derive(Component)]
+struct Square;
+
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Tile {
     num: i32,
@@ -26,6 +29,35 @@ impl Plugin for TilePlugin {
     }
 }
 
+// Placing the 4 x 4 board on the screen
+fn setup(
+    mut commands: Commands,
+) {
+    for row in 0..super::BOARD {
+        for col in 0..super::BOARD {
+            let point_position = Vec2::new(
+                super::OFFSET + col as f32 * (super::SQUARE_SIZE),
+                super::OFFSET + row as f32 * (super::SQUARE_SIZE),
+            );
+
+            commands
+                .spawn()
+                .insert(Square)
+                .insert_bundle( SpriteBundle {
+                    sprite: Sprite {
+                        color: Color::rgb(205.0 / 255.0, 193.0 / 255.0, 180.0 / 255.0),
+                        ..default()
+                    },
+                    transform: Transform {
+                        translation: point_position.extend(0.0),
+                        scale: Vec3::new(50.0, 50.0, 1.0),
+                        ..default()
+                    },
+                ..default()
+            });
+        } 
+    }
+}
 
 pub fn tile_system(
     mut commands: Commands,
