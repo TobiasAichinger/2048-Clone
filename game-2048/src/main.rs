@@ -1,8 +1,12 @@
 use bevy::prelude::*;
 
 mod tile;
+mod score;
+mod states;
+mod menu;
 
 use tile::TilePlugin;
+use states::GameState;
 
 const OFFSET: f32 = (-(4 as f32 / 2.0 * SQUARE_SIZE)) + SQUARE_SIZE / 2.;
 const SQUARE_SIZE: f32 = 75.0;
@@ -16,8 +20,9 @@ fn main() {
         height: 500.0,
         ..default()
     })
-    .add_plugins(DefaultPlugins)
     .add_startup_system(setup)
+    .add_state(GameState::Menu)
+    .add_plugins(DefaultPlugins)
     .add_plugin(TilePlugin)    
     .run();
 }
@@ -28,8 +33,6 @@ struct Square;
 fn setup(
     mut commands: Commands,
 ) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
-
     for row in 0..4 {
         for col in 0..4 {
             let point_position = Vec2::new(
