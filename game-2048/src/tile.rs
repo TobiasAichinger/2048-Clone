@@ -39,7 +39,6 @@ impl Tile {
     }
 }
 
-// Placing the 4 x 4 board on the screen
 fn setup(
     mut commands: Commands,
 ) {
@@ -73,233 +72,124 @@ pub fn tile_system(
     mut commands: Commands,
     query: Query<(Entity, &mut Transform, &mut Tile)>,
     keyboard_input: ResMut<Input<KeyCode>>,
-    asset_server: Res<AssetServer>
+    materials: Res<AssetServer>
 ) {
-    // Variable to store if a new tile needs to be spawned
-    let mut new_tile: bool = false;
-    let mut dir: u8 = 4;
+    if !keyboard_input.any_just_released([KeyCode::W, KeyCode::A, KeyCode::S, KeyCode::D, KeyCode::Down, KeyCode::Up, KeyCode::Left, KeyCode::Right]) {
+        if query.is_empty() {
+            spawn_random_tile(commands, materials, get_matrix(&Vec::new()));
+        }
 
-    // Variables for position and move detection
+        return;
+    }
+
+    let new_tile: bool;
     let mut tiles: Vec<Tile> = Vec::new();
-
-    // Board
-    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (0, 0)); BOARD_SIZE]; BOARD_SIZE];
+    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE];
 
    // Get all tiles on the board
     query.for_each( | ( _, _, tile) | {
         tiles.push(tile.clone());
     });
 
-    // Move tiles up if W was pressed
+    let dir: u8;
+
     if keyboard_input.just_released(KeyCode::Up) || keyboard_input.just_released(KeyCode::W) {
-        // Removes all entitys
-        query.for_each(|(entity, _, _)| {
-            commands.entity(entity).despawn_recursive();
-        });
-
-        matrix = get_matrix(&tiles);
-        let matrix_clone = matrix.clone();
-
-        merge(&mut matrix, 2);
         dir = 2;
-
-        new_tile = check_set_new_tile(matrix, matrix_clone);
-
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num != 0 {
-                    let tile_position = Vec2::new(
-                        super::OFFSET + matrix[i][j].pos.0 as f32 * (super::SQUARE_SIZE),
-                        super::OFFSET + matrix[i][j].pos.1 as f32 * (super::SQUARE_SIZE),
-                    );   
-
-                    commands
-                    .spawn_bundle(SpriteBundle {
-                        texture: asset_server.load(&(matrix[i][j].num.to_string() + ".png")),
-                        transform: Transform {
-                            translation: tile_position.extend(1.0),
-                            scale: Vec3::new(0.3, 0.3, 1.0),
-                            ..default()
-                        },
-                        ..default()
-                    })
-                    .insert(Tile::new(matrix[i][j].num, (matrix[i][j].pos.1, matrix[i][j].pos.0)));
-                }
-            }
-        }
-    }   
-    
-    // Move tiles down if S was pressed
-    if keyboard_input.just_released(KeyCode::Down) || keyboard_input.just_released(KeyCode::S) {
-        // Removes all entitys
-        query.for_each(|(entity, _, _)| {
-            commands.entity(entity).despawn_recursive();
-        });
-
-
-        matrix = get_matrix(&tiles);
-        let matrix_clone = matrix.clone();
-
-        merge(&mut matrix, 3);
+    } else if keyboard_input.just_released(KeyCode::Down) || keyboard_input.just_released(KeyCode::S) {
         dir = 3;
-
-        new_tile = check_set_new_tile(matrix, matrix_clone);
-
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num != 0 {
-                    let tile_position = Vec2::new(
-                        super::OFFSET + matrix[i][j].pos.0 as f32 * (super::SQUARE_SIZE),
-                        super::OFFSET + matrix[i][j].pos.1 as f32 * (super::SQUARE_SIZE),
-                    );   
-
-                    commands
-                    .spawn_bundle(SpriteBundle {
-                        texture: asset_server.load(&(matrix[i][j].num.to_string() + ".png")),
-                        transform: Transform {
-                            translation: tile_position.extend(1.0),
-                            scale: Vec3::new(0.3, 0.3, 1.0),
-                            ..default()
-                        },
-                        ..default()
-                    })
-                    .insert(Tile::new(matrix[i][j].num, (matrix[i][j].pos.1, matrix[i][j].pos.0)));
-                }
-            }
-        }
-    } 
-
-    // Move tiles right if D was pressed
-    if keyboard_input.just_released(KeyCode::Right) || keyboard_input.just_released(KeyCode::D) {
-        // Removes all entitys
-        query.for_each(|(entity, _, _)| {
-            commands.entity(entity).despawn_recursive();
-        });
-
-        matrix = get_matrix(&tiles);
-        let matrix_clone = matrix.clone();
-
-        merge(&mut matrix, 1);
+    } else if keyboard_input.just_released(KeyCode::Right) || keyboard_input.just_released(KeyCode::D) {
         dir = 1;
+    } else {
+        dir = 0;
+    }
 
-        new_tile = check_set_new_tile(matrix, matrix_clone);
+    // Removes all entitys
+    query.for_each(|(entity, _, _)| {
+        commands.entity(entity).despawn_recursive();
+    });
 
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num != 0 {
-                    let tile_position = Vec2::new(
-                        super::OFFSET + matrix[i][j].pos.0 as f32 * (super::SQUARE_SIZE),
-                        super::OFFSET + matrix[i][j].pos.1 as f32 * (super::SQUARE_SIZE),
-                    );   
-    
-                    commands
-                    .spawn_bundle(SpriteBundle {
-                        texture: asset_server.load(&(matrix[i][j].num.to_string() + ".png")),
-                        transform: Transform {
-                            translation: tile_position.extend(1.0),
-                            scale: Vec3::new(0.3, 0.3, 1.0),
-                            ..default()
-                        },
+    matrix = get_matrix(&tiles);
+    let matrix_clone: [[Tile; 4]; 4] = matrix.clone();
+    merge(&mut matrix, dir);
+    new_tile = check_set_new_tile(matrix, matrix_clone);
+
+    for i in 0..matrix.len() {
+        for j in 0..matrix[i].len() {
+            if matrix[i][j].num != 0 {
+                let tile_position = Vec2::new(
+                    super::OFFSET + matrix[i][j].pos.0 as f32 * (super::SQUARE_SIZE),
+                    super::OFFSET + matrix[i][j].pos.1 as f32 * (super::SQUARE_SIZE),
+                );   
+                commands
+                .spawn_bundle(SpriteBundle {
+                    texture: materials.load(&(matrix[i][j].num.to_string() + ".png")),
+                    transform: Transform {
+                        translation: tile_position.extend(1.0),
+                        scale: Vec3::new(0.3, 0.3, 1.0),
                         ..default()
-                    })
-                    .insert(Tile::new(matrix[i][j].num, (matrix[i][j].pos.1, matrix[i][j].pos.0)));
-                }
+                    },
+                    ..default()
+                })
+                .insert(Tile::new(matrix[i][j].num, (matrix[i][j].pos.1, matrix[i][j].pos.0)));
             }
         }
     }
 
-    // Move tiles left if A was pressed
-    if keyboard_input.just_released(KeyCode::Left) || keyboard_input.just_released(KeyCode::A) {
-        // Removes all entitys
-        query.for_each(|(entity, _, _)| {
-            commands.entity(entity).despawn_recursive();
-        });
-
-        matrix = get_matrix(&tiles);
-        let matrix_clone = matrix.clone();
-
-        merge(&mut matrix, 0);
-        dir = 0;
-
-        new_tile = check_set_new_tile(matrix, matrix_clone);
-
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num != 0 {
-                    let tile_position = Vec2::new(
-                        super::OFFSET + matrix[i][j].pos.0 as f32 * (super::SQUARE_SIZE),
-                        super::OFFSET + matrix[i][j].pos.1 as f32 * (super::SQUARE_SIZE),
-                    );   
-    
-                    commands
-                    .spawn_bundle(SpriteBundle {
-                        texture: asset_server.load(&(matrix[i][j].num.to_string() + ".png")),
-                        transform: Transform {
-                            translation: tile_position.extend(1.0),
-                            scale: Vec3::new(0.3, 0.3, 1.0),
-                            ..default()
-                        },
-                        ..default()
-                    })
-                    .insert(Tile::new(matrix[i][j].num, (matrix[i][j].pos.1, matrix[i][j].pos.0)));
-                }
-            }
-        }
-    }  
-
     if new_tile || tiles.len() == 0 {
-        let mut positions: Vec<(i32, i32)> = Vec::new();
-        let mut rng = rand::thread_rng();
+        spawn_random_tile(commands, materials, matrix);
+    }
+}
 
-        for i in 0..matrix.len() {
-            for j in 0..matrix[i].len() {
-                if matrix[i][j].num == 0 {
-                    positions.push(matrix[i][j].pos);
-                }
+fn spawn_random_tile(
+    mut commands: Commands,
+    materials: Res<AssetServer>,
+    matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE]
+) {
+    let mut positions: Vec<(i32, i32)> = Vec::new();
+    let mut rng = rand::thread_rng();
+
+    for i in 0..matrix.len() {
+        for j in 0..matrix[i].len() {
+            if matrix[i][j].num == 0 {
+                positions.push(matrix[i][j].pos);
             }
         }
-        
-        if positions.len() > 0 {
-            let idx: usize = rng.gen_range(0..positions.len());
+    }
+    
+    if positions.len() > 0 {
+        let idx: usize = rng.gen_range(0..positions.len());
+        let tile_position = Vec2::new(
+            super::OFFSET + positions[idx].0  as f32 * (super::SQUARE_SIZE),
+            super::OFFSET + positions[idx].1 as f32 * (super::SQUARE_SIZE),
+        );   
 
-            if rng.gen_range(0..10) == 9 {
-                let tile_position = Vec2::new(
-                    super::OFFSET + positions[idx].0  as f32 * (super::SQUARE_SIZE),
-                    super::OFFSET + positions[idx].1 as f32 * (super::SQUARE_SIZE),
-                );   
-    
-                commands
-                .spawn_bundle(SpriteBundle {
-                    texture: asset_server.load("4.png"),
-                    transform: Transform {
-                        translation: tile_position.extend(1.0),
-                        scale: Vec3::new(0.3, 0.3, 1.0),
-                        ..default()
-                    },
+        if rng.gen_range(0..10) == 9 {
+            commands
+            .spawn_bundle(SpriteBundle {
+                texture: materials.load("4.png"),
+                transform: Transform {
+                    translation: tile_position.extend(1.0),
+                    scale: Vec3::new(0.3, 0.3, 1.0),
                     ..default()
-                })
-                .insert(Tile::new(4, (positions[idx].1, positions[idx].0)));
-            } else {
-                let tile_position = Vec2::new(
-                    super::OFFSET + positions[idx].0  as f32 * (super::SQUARE_SIZE),
-                    super::OFFSET + positions[idx].1 as f32 * (super::SQUARE_SIZE),
-                );   
-    
-                commands
-                .spawn_bundle(SpriteBundle {
-                    texture: asset_server.load("2.png"),
-                    transform: Transform {
-                        translation: tile_position.extend(1.0),
-                        scale: Vec3::new(0.3, 0.3, 1.0),
-                        ..default()
-                    },
+                },
+                ..default()
+            })
+            .insert(Tile::new(4, (positions[idx].1, positions[idx].0)));
+        } else {
+            commands
+            .spawn_bundle(SpriteBundle {
+                texture: materials.load("2.png"),
+                transform: Transform {
+                    translation: tile_position.extend(1.0),
+                    scale: Vec3::new(0.3, 0.3, 1.0),
                     ..default()
-                })
-                .insert(Tile::new(2, (positions[idx].1, positions[idx].0)));
-            }
-    
-            drop(rng);
+                },
+                ..default()
+            })
+            .insert(Tile::new(2, (positions[idx].1, positions[idx].0)));
         }
+
+        drop(rng);
     }
 }
 
