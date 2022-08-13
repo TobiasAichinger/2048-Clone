@@ -35,8 +35,6 @@ fn setup_menu(
     mut commands: Commands,
     materials: Res<AssetServer>,
 ) {
-    info!("Setup");
-
     commands
     .spawn_bundle(ButtonBundle {
         style: Style {

@@ -11,6 +11,7 @@ const BACKGROUND_COLOR: Color = Color::rgb(250.0 / 255.0, 248.0 / 255.0, 239.0 /
 use tile::TilePlugin;
 use states::GameState;
 use menu::MenuPlugin;
+use score::ScorePlugin;
 
 const OFFSET: f32 = (-(4 as f32 / 2.0 * SQUARE_SIZE)) + SQUARE_SIZE / 2.;
 const SQUARE_SIZE: f32 = 75.0;
@@ -27,6 +28,7 @@ fn main() {
     .add_state(GameState::Menu)
     .add_plugins(DefaultPlugins)
     .add_plugin(MenuPlugin)
+    .add_plugin(ScorePlugin)
     .add_plugin(TilePlugin)    
     .run();
 }
