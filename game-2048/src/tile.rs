@@ -1,7 +1,23 @@
 use bevy::prelude::*;
 use rand::Rng;
 
+use crate::states::GameState;
+
 const BOARD_SIZE: usize = super::BOARD;
+
+impl Plugin for TilePlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .add_system_set(
+                SystemSet::on_enter(GameState::Playing)
+                    .with_system(setup)
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::Playing)
+                    .with_system(tile_system)
+            );
+    }
+}
 
 pub struct TilePlugin;
 
@@ -20,12 +36,6 @@ impl Tile {
             num: number,
             pos: position,
         }
-    }
-}
-
-impl Plugin for TilePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_system(tile_system);
     }
 }
 
