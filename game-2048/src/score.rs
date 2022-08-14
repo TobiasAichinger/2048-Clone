@@ -26,7 +26,7 @@ impl Plugin for ScorePlugin {
 pub struct ScorePlugin;
 
 #[derive(Default, Component, Debug, Clone, Copy)]
-pub struct Score(u64);
+pub struct Score(pub u16);
 
 impl std::fmt::Display for Score {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -64,10 +64,10 @@ fn spawn_score(
 }
 
 fn update_score(
-    score: ResMut<Score>,
     mut score_query: Query<(&mut Text, &Score)>
 ) {
-    for (mut text, _) in score_query.iter_mut() {
+    for (mut text, score) in score_query.iter_mut() {
+        info!("{}", score.to_string());
         text.sections[0].value = score.to_string();
     }
 }

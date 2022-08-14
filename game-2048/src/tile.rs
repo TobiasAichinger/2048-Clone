@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use rand::Rng;
 
 use crate::states::GameState;
+use crate::score::Score;
 
 const BOARD_SIZE: usize = super::BOARD;
 
@@ -68,11 +69,12 @@ fn setup(
     }
 }
 
-pub fn tile_system(
+fn tile_system(
     mut commands: Commands,
     query: Query<(Entity, &mut Transform, &mut Tile)>,
     keyboard_input: ResMut<Input<KeyCode>>,
-    materials: Res<AssetServer>
+    materials: Res<AssetServer>,
+    mut score_query: Query<&mut Score>
 ) {
     if !keyboard_input.any_just_released([KeyCode::W, KeyCode::A, KeyCode::S, KeyCode::D, KeyCode::Down, KeyCode::Up, KeyCode::Left, KeyCode::Right]) {
         if query.is_empty() {
@@ -110,7 +112,10 @@ pub fn tile_system(
 
     matrix = get_matrix(&tiles);
     let matrix_clone: [[Tile; 4]; 4] = matrix.clone();
-    merge(&mut matrix, dir);
+    for mut score in score_query.iter_mut() {
+        score.0 += merge(&mut matrix, dir);
+        info!("{}", score.0);
+    }
     new_tile = check_set_new_tile(matrix, matrix_clone);
 
     for i in 0..matrix.len() {
@@ -216,8 +221,9 @@ fn get_matrix(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
     matrix
 }
 
-fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
+fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) -> u16 {
     let mut idx: usize = 0;
+    let mut score: u16 = 0;
     
     match direction {
         0 => { // left to right
@@ -252,6 +258,7 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
                     if tiles[i][j].num != 0 && i != 0 {
                         if tiles[i][j].num == tiles[i - 1][j].num {
                             tiles[i - 1][j].num *= 2;
+                            score += tiles[i - 1][j].num as u16;
                             tiles[i][j].num = 0;
                         }
                     }
@@ -315,6 +322,7 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
                 for j in 0..tiles.len() {
                     if tiles[tiles.len() - i][j].num == tiles[tiles.len() - i - 1][j].num {
                         tiles[tiles.len() - i][j].num *= 2;
+                        score += tiles[tiles.len() - i][j].num as u16;
                         tiles[tiles.len() - i - 1][j].num = 0;
                     } 
                 }
@@ -376,6 +384,7 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
                 for j in 0..tiles[i].len()  - 1 {
                     if tiles[i][j].num == tiles[i][j + 1].num {
                         tiles[i][j + 1].num *= 2;
+                        score += tiles[i][j + 1].num as u16;
                         tiles[i][j].num = 0;
                     }
                 }
@@ -438,6 +447,7 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
                 for j in 1..tiles[i].len() {
                     if tiles[i][j].num == tiles[i][j - 1].num {
                         tiles[i][j - 1].num *= 2;
+                        score += tiles[i][j - 1].num as u16;
                         tiles[i][j].num = 0;
                     }
                 }
@@ -470,6 +480,8 @@ fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) {
             set_position(tiles);
         }
     }
+
+    score
 }
 
 fn set_position(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE]) {
