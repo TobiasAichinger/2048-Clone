@@ -7,6 +7,7 @@ This game was made just for fun, I've written it in rust using the bevy game eng
 * Movement with W, A, S and D or Up, Left, Down and Right
 * Merging the tiles together
 * Spawning new tiles after each round
+* Ai modus ~ still in developement
 
 ## How it looks like
 
