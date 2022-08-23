@@ -2,4 +2,5 @@
 pub enum GameState {
     Menu,
     Playing,
+    Ai,
 }
