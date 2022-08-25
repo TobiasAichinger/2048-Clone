@@ -3,8 +3,7 @@ use rand::Rng;
 
 use crate::states::GameState;
 use crate::score::Score;
-
-const BOARD_SIZE: usize = super::BOARD;
+use crate::logic::Logic;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
@@ -28,12 +27,12 @@ struct Square;
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Tile {
-    num: i32,
-    pos: (usize, usize)
+    pub num: i32,
+    pub pos: (usize, usize)
 }
 
 impl Tile {
-    fn new(num: i32, pos: (usize, usize)) -> Tile {
+    pub fn new(num: i32, pos: (usize, usize)) -> Tile {
         Tile {
             num,
             pos,
@@ -75,24 +74,20 @@ fn tile_system(
     keyboard_input: ResMut<Input<KeyCode>>,
     materials: Res<AssetServer>,
     mut score_query: Query<&mut Score>,
-    mut query: Query<&mut Tile>
+    mut query: Query<(Entity, &mut Tile)>
 ) {
     if !keyboard_input.any_just_released([KeyCode::W, KeyCode::A, KeyCode::S, KeyCode::D, KeyCode::Down, KeyCode::Up, KeyCode::Left, KeyCode::Right]) {
         if query.is_empty() {
-            spawn_random_tile(commands, materials, get_matrix(&vec![]));
+            spawn_random_tile(commands, materials, Logic::get_matrix(&vec![]));
         }
 
         return;
     }
 
-    for mut tile in query.iter_mut() {
-        tile.pos.1 += 1;
-        info!("{:?}", tile.pos)
-    }
-
     let new_tile: bool;
-    let mut tiles: Vec<Tile> = Vec::new();
-    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE];
+    let mut tiles: Vec<Tile> = vec![];
+    query.iter().for_each( | (_, t) | tiles.push(*t));
+    let mut matrix: [[Tile; super::BOARD]; super::BOARD];
 
     let dir: u8;
 
@@ -106,7 +101,7 @@ fn tile_system(
         dir = 3;
     }
 
-    matrix = get_matrix(&tiles);
+    matrix = Logic::get_matrix(&tiles);
 
     for i in 0..matrix.len() {
         for j in 0..matrix[i].len() {
@@ -123,7 +118,7 @@ fn tile_system(
         score.0 += 1; // merge score later
     }
 
-    new_tile = check_set_new_tile(matrix, matrix_clone);
+    new_tile = Logic::check_set_new_tile(matrix, matrix_clone);
 
     if new_tile {
         spawn_random_tile(commands, materials, matrix);
@@ -136,9 +131,8 @@ fn move_tiles(
 ) {
     for (mut transform, tile) in query.iter_mut() {
         // Get the direction to move in
-        let direction = Vec3::new(super::OFFSET + tile.pos.0 as f32 * super::SQUARE_SIZE, super::OFFSET + (BOARD_SIZE - 1 - tile.pos.1) as f32 * super::SQUARE_SIZE, 1.0) - transform.translation;
+        let direction = Vec3::new(super::OFFSET + tile.pos.0 as f32 * super::SQUARE_SIZE, super::OFFSET + (super::BOARD - 1 - tile.pos.1) as f32 * super::SQUARE_SIZE, 1.0) - transform.translation;
         // Only move if the piece isn't already there (distance is big)
-        info!("{:?}, {:?}, {:?}", tile.pos, direction.length(), transform.translation);
         if direction.length() > 0.1 {
             transform.translation += direction.normalize() * (time.delta_seconds() * 500.);
         }
@@ -148,7 +142,7 @@ fn move_tiles(
 fn spawn_random_tile(
     mut commands: Commands,
     materials: Res<AssetServer>,
-    matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE]
+    matrix: [[Tile; super::BOARD]; super::BOARD]
 ) {
     let mut positions: Vec<(usize, usize)> = Vec::new();
     let mut rng = rand::thread_rng();
@@ -190,26 +184,4 @@ fn spawn_random_tile(
 
         drop(rng);
     }
-}
-
-fn check_set_new_tile(matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE], matrix_clone: [[Tile; BOARD_SIZE]; BOARD_SIZE]) -> bool {
-    for i in 0..matrix.len() {
-        for j in 0..matrix[i].len() {
-            if matrix[i][j].num != matrix_clone[i][j].num {
-                return true; 
-            }
-        }
-    }
-
-    false
-}
-
-fn get_matrix(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
-    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (3, 3)); BOARD_SIZE]; BOARD_SIZE];
-
-    for tile in tiles {
-        matrix[tile.pos.1 as usize][tile.pos.0 as usize] = *tile;
-    }
-
-    matrix
 }

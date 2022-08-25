@@ -5,6 +5,7 @@ mod score;
 mod states;
 mod menu;
 mod ai;
+mod logic;
 
 const BOARD: usize = 4;
 const BACKGROUND_COLOR: Color = Color::rgb(250.0 / 255.0, 248.0 / 255.0, 239.0 / 255.0);
