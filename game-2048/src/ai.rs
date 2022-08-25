@@ -26,5 +26,5 @@ fn setup_ai() {
 fn solve(
     mut board: Query<(Entity, &mut Transform, &mut Tile)>,
 ) {
-
+    
 }

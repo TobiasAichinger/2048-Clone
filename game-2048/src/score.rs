@@ -67,7 +67,6 @@ fn update_score(
     mut score_query: Query<(&mut Text, &Score)>
 ) {
     for (mut text, score) in score_query.iter_mut() {
-        info!("{}", score.to_string());
         text.sections[0].value = score.to_string();
     }
 }

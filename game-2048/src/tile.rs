@@ -112,10 +112,11 @@ fn tile_system(
 
     matrix = get_matrix(&tiles);
     let matrix_clone: [[Tile; 4]; 4] = matrix.clone();
+
     for mut score in score_query.iter_mut() {
-        score.0 += merge(&mut matrix, dir);
-        info!("{}", score.0);
+        score.0 += 1; // merge score later
     }
+
     new_tile = check_set_new_tile(matrix, matrix_clone);
 
     for i in 0..matrix.len() {
@@ -140,9 +141,17 @@ fn tile_system(
         }
     }
 
-    if new_tile || tiles.len() == 0 {
+    if new_tile {
         spawn_random_tile(commands, materials, matrix);
     }
+}
+
+fn debug_info(matrix: &[[Tile; BOARD_SIZE]; BOARD_SIZE]) {
+    for i in 0..matrix.len() {
+        info!("{:?} {:?} {:?} {:?}", matrix[i][0].num, matrix[i][1].num, matrix[i][2].num, matrix[i][3].num);
+    }
+
+    info!("\n");
 }
 
 fn spawn_random_tile(
@@ -216,279 +225,6 @@ fn get_matrix(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
     for tile in tiles {
         matrix[tile.pos.1 as usize][tile.pos.0 as usize] = *tile;
     }
-
-    set_position(&mut matrix);
-    matrix
-}
-
-fn merge(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE], direction: u8) -> u16 {
-    let mut idx: usize = 0;
-    let mut score: u16 = 0;
     
-    match direction {
-        0 => { // left to right
-            // Push together
-
-            for i in 1..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    if tiles[i][j].num != 0 {
-                        while tiles[i - (idx + 1)][j].num == 0 {
-                            if idx < i - 1 {
-                                idx += 1;
-                            } else {
-                                idx += 1;
-                                break;
-                            }
-                        }
-
-                        if i != i - idx {
-                            tiles[i - idx][j].num = tiles[i][j].num;
-                            tiles[i][j].num = 0;
-                        }
-                    }
-
-                    idx = 0;
-                }
-            }
-
-            // Merge everything next to each other together
-
-            for i in 1..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    if tiles[i][j].num != 0 && i != 0 {
-                        if tiles[i][j].num == tiles[i - 1][j].num {
-                            tiles[i - 1][j].num *= 2;
-                            score += tiles[i - 1][j].num as u16;
-                            tiles[i][j].num = 0;
-                        }
-                    }
-                } 
-            }
-
-            // Push everything together again
-
-            for i in 1..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    if tiles[i][j].num != 0 {
-                        while tiles[i - (idx + 1)][j].num == 0 {
-                            if idx < i - 1 {
-                                idx += 1;
-                            } else {
-                                idx += 1;
-                                break;
-                            }
-                        }
-
-                        if i != i - idx {
-                            tiles[i - idx][j].num = tiles[i][j].num;
-                            tiles[i][j].num = 0;
-                        }
-                    }
-
-                    idx = 0;
-                }
-            }
-
-            set_position(tiles);
-        },
-        1 => { // right to left
-            // Push together
-
-            for i in 1..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    if tiles[tiles.len() - i - 1][j].num != 0 {
-                        while tiles[(tiles.len() - i - 1) + (idx + 1)][j].num == 0 {
-                            if idx < i - 1 {
-                                idx += 1;
-                            } else {
-                                idx += 1;
-                                break;
-                            }
-                        }
-                    }
-
-                    if tiles.len() - i != tiles.len() - i + idx {
-                        tiles[tiles.len() - i - 1 + idx][j].num = tiles[tiles.len() - i - 1][j].num;
-                        tiles[tiles.len() - i - 1][j].num = 0;
-                    }
-
-                    idx = 0;
-                }
-            }
-
-            // Merge
-
-            for i in 1..tiles.len() {
-                for j in 0..tiles.len() {
-                    if tiles[tiles.len() - i][j].num == tiles[tiles.len() - i - 1][j].num {
-                        tiles[tiles.len() - i][j].num *= 2;
-                        score += tiles[tiles.len() - i][j].num as u16;
-                        tiles[tiles.len() - i - 1][j].num = 0;
-                    } 
-                }
-            }
-
-            // Push together again
-
-            for i in 1..tiles.len() {
-                for j in 0..tiles[i].len() {
-                    if tiles[tiles.len() - i - 1][j].num != 0 {
-                        while tiles[(tiles.len() - i - 1) + (idx + 1)][j].num == 0 {
-                            if idx < i - 1 {
-                                idx += 1;
-                            } else {
-                                idx += 1;
-                                break;
-                            }
-                        }
-                    }
-
-                    if tiles.len() - i != tiles.len() - i + idx {
-                        tiles[tiles.len() - i - 1 + idx][j].num = tiles[tiles.len() - i - 1][j].num;
-                        tiles[tiles.len() - i - 1][j].num = 0;
-                    }
-
-                    idx = 0;
-                }
-            }
-
-            set_position(tiles);
-        },
-        2 => { // bottom to top
-            // Push together
-            for i in 0..tiles.len() {
-                for j in 0..tiles[i].len() - 1 {
-                    if tiles[i][j].num != 0 {
-                        while tiles[i][j + (idx + 1)].num == 0 {
-                            if idx + 1 < tiles[i].len() - j - 1 {
-                                idx += 1;
-                            } else {
-                                idx += 1;
-                                break;
-                            }
-                        }
-
-                        if j != j + idx {
-                            tiles[i][j + idx].num = tiles[i][j].num;
-                            tiles[i][j].num = 0;
-                        }
-
-                        idx = 0;
-                    }
-                }
-            }
-
-            // Merge
-
-            for i in 0..tiles.len() {
-                for j in 0..tiles[i].len()  - 1 {
-                    if tiles[i][j].num == tiles[i][j + 1].num {
-                        tiles[i][j + 1].num *= 2;
-                        score += tiles[i][j + 1].num as u16;
-                        tiles[i][j].num = 0;
-                    }
-                }
-            }
-
-            // Push together again
-
-            for i in 0..tiles.len() {
-                for j in 0..tiles[i].len() - 1 {
-                    if tiles[i][j].num != 0 {
-                        while tiles[i][j + (idx + 1)].num == 0 {
-                            if idx + 1 < tiles[i].len() - j - 1 {
-                                idx += 1;
-                            } else {
-                                idx += 1;
-                                break;
-                            }
-                        }
-
-                        if j != j + idx {
-                            tiles[i][j + idx].num = tiles[i][j].num;
-                            tiles[i][j].num = 0;
-                        }
-
-                        idx = 0;
-                    }
-                }
-            }
-
-            set_position(tiles);
-        },
-        _ => { // top to bottom
-            // Push everything together
-
-            for i in 0..tiles.len() {
-                for j in 1..tiles[i].len() {
-                    if tiles[i][j].num != 0 {
-                        while tiles[i][j - (idx + 1)].num == 0 {
-                            if idx < j - 1 {
-                                idx += 1;
-                            } else {
-                                idx += 1;
-                                break;
-                            }
-                        }
-
-                        if j != j + idx {
-                            tiles[i][j - idx].num = tiles[i][j].num;
-                            tiles[i][j].num = 0;
-                        }
-
-                        idx = 0;
-                    }
-                }
-            }
-
-            // Merge
-
-            for i in 0..tiles.len() {
-                for j in 1..tiles[i].len() {
-                    if tiles[i][j].num == tiles[i][j - 1].num {
-                        tiles[i][j - 1].num *= 2;
-                        score += tiles[i][j - 1].num as u16;
-                        tiles[i][j].num = 0;
-                    }
-                }
-            }
-
-            // Push together
-
-            for i in 0..tiles.len() {
-                for j in 1..tiles[i].len() {
-                    if tiles[i][j].num != 0 {
-                        while tiles[i][j - (idx + 1)].num == 0 {
-                            if idx < j - 1 {
-                                idx += 1;
-                            } else {
-                                idx += 1;
-                                break;
-                            }
-                        }
-
-                        if j != j + idx {
-                            tiles[i][j - idx].num = tiles[i][j].num;
-                            tiles[i][j].num = 0;
-                        }
-
-                        idx = 0;
-                    }
-                }
-            }
-
-            set_position(tiles);
-        }
-    }
-
-    score
-}
-
-fn set_position(tiles: &mut [[Tile; BOARD_SIZE]; BOARD_SIZE]) {
-    for i in 0..tiles.len() {
-        for j in 0..tiles[i].len() {
-            tiles[i][j].pos.0 = i as i32;
-            tiles[i][j].pos.1 = j as i32;            
-        }
-    }
+    matrix
 }
