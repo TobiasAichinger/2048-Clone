@@ -15,6 +15,7 @@ impl Plugin for TilePlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
+                    .with_system(move_tiles)
                     .with_system(tile_system)
             );
     }
@@ -71,10 +72,10 @@ fn setup(
 
 fn tile_system(
     mut commands: Commands,
-    query: Query<(Entity, &mut Transform, &mut Tile)>,
     keyboard_input: ResMut<Input<KeyCode>>,
     materials: Res<AssetServer>,
-    mut score_query: Query<&mut Score>
+    mut score_query: Query<&mut Score>,
+    mut query: Query<&mut Tile>
 ) {
     if !keyboard_input.any_just_released([KeyCode::W, KeyCode::A, KeyCode::S, KeyCode::D, KeyCode::Down, KeyCode::Up, KeyCode::Left, KeyCode::Right]) {
         if query.is_empty() {
@@ -84,31 +85,26 @@ fn tile_system(
         return;
     }
 
+    for mut tile in query.iter_mut() {
+        tile.pos.1 += 1;
+        info!("{:?}", tile.pos)
+    }
+
     let new_tile: bool;
     let mut tiles: Vec<Tile> = Vec::new();
     let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE];
 
-   // Get all tiles on the board
-    query.for_each( | ( _, _, tile) | {
-        tiles.push(tile.clone());
-    });
-
     let dir: u8;
 
     if keyboard_input.just_released(KeyCode::Up) || keyboard_input.just_released(KeyCode::W) {
-        dir = 2;
-    } else if keyboard_input.just_released(KeyCode::Down) || keyboard_input.just_released(KeyCode::S) {
-        dir = 3;
-    } else if keyboard_input.just_released(KeyCode::Right) || keyboard_input.just_released(KeyCode::D) {
-        dir = 1;
-    } else {
         dir = 0;
+    } else if keyboard_input.just_released(KeyCode::Down) || keyboard_input.just_released(KeyCode::S) {
+        dir = 1;
+    } else if keyboard_input.just_released(KeyCode::Right) || keyboard_input.just_released(KeyCode::D) {
+        dir = 2;
+    } else {
+        dir = 3;
     }
-
-    // Removes all entitys
-    query.for_each(|(entity, _, _)| {
-        commands.entity(entity).despawn_recursive();
-    });
 
     matrix = get_matrix(&tiles);
 
@@ -129,30 +125,23 @@ fn tile_system(
 
     new_tile = check_set_new_tile(matrix, matrix_clone);
 
-    for i in 0..matrix.len() {
-        for j in 0..matrix[i].len() {
-            if matrix[i][j].num != 0 {
-                let tile_position = Vec2::new(
-                    super::OFFSET + matrix[i][j].pos.0 as f32 * (super::SQUARE_SIZE),
-                    super::OFFSET + (matrix.len() - 1 - matrix[i][j].pos.1) as f32 * (super::SQUARE_SIZE),
-                );   
-                commands
-                .spawn_bundle(SpriteBundle {
-                    texture: materials.load(&(matrix[i][j].num.to_string() + ".png")),
-                    transform: Transform {
-                        translation: tile_position.extend(1.0),
-                        scale: Vec3::new(0.3, 0.3, 1.0),
-                        ..default()
-                    },
-                    ..default()
-                })
-                .insert(Tile::new(matrix[i][j].num, (matrix[i][j].pos.0, matrix[i][j].pos.1)));
-            }
-        }
-    }
-
     if new_tile {
         spawn_random_tile(commands, materials, matrix);
+    }
+}
+
+fn move_tiles(
+    time: Res<Time>, 
+    mut query: Query<(&mut Transform, &Tile)>
+) {
+    for (mut transform, tile) in query.iter_mut() {
+        // Get the direction to move in
+        let direction = Vec3::new(super::OFFSET + tile.pos.0 as f32 * super::SQUARE_SIZE, super::OFFSET + (BOARD_SIZE - 1 - tile.pos.1) as f32 * super::SQUARE_SIZE, 1.0) - transform.translation;
+        // Only move if the piece isn't already there (distance is big)
+        info!("{:?}, {:?}, {:?}", tile.pos, direction.length(), transform.translation);
+        if direction.length() > 0.1 {
+            transform.translation += direction.normalize() * (time.delta_seconds() * 500.);
+        }
     }
 }
 
@@ -197,7 +186,7 @@ fn spawn_random_tile(
             },
             ..default()
         })
-        .insert(Tile::new(path.remove(0).to_digit(10).unwrap() as i32, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
+        .insert(Tile::new(path.remove(0).to_digit(10).unwrap() as i32, (positions[idx].1, matrix.len() - 1 - positions[idx].1)));
 
         drop(rng);
     }
@@ -216,7 +205,7 @@ fn check_set_new_tile(matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE], matrix_clone: [[
 }
 
 fn get_matrix(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
-    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (1, 0)); BOARD_SIZE]; BOARD_SIZE];
+    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (3, 3)); BOARD_SIZE]; BOARD_SIZE];
 
     for tile in tiles {
         matrix[tile.pos.1 as usize][tile.pos.0 as usize] = *tile;
