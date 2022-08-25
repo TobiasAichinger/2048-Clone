@@ -179,31 +179,25 @@ fn spawn_random_tile(
             super::OFFSET + positions[idx].1 as f32 * (super::SQUARE_SIZE),
         );   
 
+        let mut path: String;
+
         if rng.gen_range(0..10) == 9 {
-            commands
-            .spawn_bundle(SpriteBundle {
-                texture: materials.load("4.png"),
-                transform: Transform {
-                    translation: tile_position.extend(1.0),
-                    scale: Vec3::new(0.3, 0.3, 1.0),
-                    ..default()
-                },
-                ..default()
-            })
-            .insert(Tile::new(4, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
+            path = "4.png".to_string();
         } else {
-            commands
-            .spawn_bundle(SpriteBundle {
-                texture: materials.load("2.png"),
-                transform: Transform {
-                    translation: tile_position.extend(1.0),
-                    scale: Vec3::new(0.3, 0.3, 1.0),
-                    ..default()
-                },
-                ..default()
-            })
-            .insert(Tile::new(2, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
+            path = "2.png".to_string();
         }
+
+        commands
+        .spawn_bundle(SpriteBundle {
+            texture: materials.load(&path),
+            transform: Transform {
+                translation: tile_position.extend(1.0),
+                scale: Vec3::new(0.3, 0.3, 1.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Tile::new(path.remove(0).to_digit(10).unwrap() as i32, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
 
         drop(rng);
     }
