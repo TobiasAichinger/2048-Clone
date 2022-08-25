@@ -28,14 +28,14 @@ struct Square;
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Tile {
     num: i32,
-    pos: (i32, i32)
+    pos: (usize, usize)
 }
 
 impl Tile {
-    fn new(number: i32, position: (i32, i32)) -> Tile {
+    fn new(num: i32, pos: (usize, usize)) -> Tile {
         Tile {
-            num: number,
-            pos: position,
+            num,
+            pos,
         }
     }
 }
@@ -78,7 +78,7 @@ fn tile_system(
 ) {
     if !keyboard_input.any_just_released([KeyCode::W, KeyCode::A, KeyCode::S, KeyCode::D, KeyCode::Down, KeyCode::Up, KeyCode::Left, KeyCode::Right]) {
         if query.is_empty() {
-            spawn_random_tile(commands, materials, get_matrix(&Vec::new()));
+            spawn_random_tile(commands, materials, get_matrix(&vec![]));
         }
 
         return;
@@ -111,6 +111,16 @@ fn tile_system(
     });
 
     matrix = get_matrix(&tiles);
+
+    for i in 0..matrix.len() {
+        for j in 0..matrix[i].len() {
+            print!("{:?}", matrix[i][j].num);
+        }
+        println!();
+    }
+
+    println!();
+
     let matrix_clone: [[Tile; 4]; 4] = matrix.clone();
 
     for mut score in score_query.iter_mut() {
@@ -124,7 +134,7 @@ fn tile_system(
             if matrix[i][j].num != 0 {
                 let tile_position = Vec2::new(
                     super::OFFSET + matrix[i][j].pos.0 as f32 * (super::SQUARE_SIZE),
-                    super::OFFSET + matrix[i][j].pos.1 as f32 * (super::SQUARE_SIZE),
+                    super::OFFSET + (matrix.len() - 1 - matrix[i][j].pos.1) as f32 * (super::SQUARE_SIZE),
                 );   
                 commands
                 .spawn_bundle(SpriteBundle {
@@ -136,7 +146,7 @@ fn tile_system(
                     },
                     ..default()
                 })
-                .insert(Tile::new(matrix[i][j].num, (matrix[i][j].pos.1, matrix[i][j].pos.0)));
+                .insert(Tile::new(matrix[i][j].num, (matrix[i][j].pos.0, matrix[i][j].pos.1)));
             }
         }
     }
@@ -146,26 +156,18 @@ fn tile_system(
     }
 }
 
-fn debug_info(matrix: &[[Tile; BOARD_SIZE]; BOARD_SIZE]) {
-    for i in 0..matrix.len() {
-        info!("{:?} {:?} {:?} {:?}", matrix[i][0].num, matrix[i][1].num, matrix[i][2].num, matrix[i][3].num);
-    }
-
-    info!("\n");
-}
-
 fn spawn_random_tile(
     mut commands: Commands,
     materials: Res<AssetServer>,
     matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE]
 ) {
-    let mut positions: Vec<(i32, i32)> = Vec::new();
+    let mut positions: Vec<(usize, usize)> = Vec::new();
     let mut rng = rand::thread_rng();
 
     for i in 0..matrix.len() {
         for j in 0..matrix[i].len() {
             if matrix[i][j].num == 0 {
-                positions.push(matrix[i][j].pos);
+                positions.push((matrix[i][j].pos.0, matrix[i][j].pos.1));
             }
         }
     }
@@ -173,7 +175,7 @@ fn spawn_random_tile(
     if positions.len() > 0 {
         let idx: usize = rng.gen_range(0..positions.len());
         let tile_position = Vec2::new(
-            super::OFFSET + positions[idx].0  as f32 * (super::SQUARE_SIZE),
+            super::OFFSET + positions[idx].0 as f32 * (super::SQUARE_SIZE),
             super::OFFSET + positions[idx].1 as f32 * (super::SQUARE_SIZE),
         );   
 
@@ -188,7 +190,7 @@ fn spawn_random_tile(
                 },
                 ..default()
             })
-            .insert(Tile::new(4, (positions[idx].1, positions[idx].0)));
+            .insert(Tile::new(4, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
         } else {
             commands
             .spawn_bundle(SpriteBundle {
@@ -200,7 +202,7 @@ fn spawn_random_tile(
                 },
                 ..default()
             })
-            .insert(Tile::new(2, (positions[idx].1, positions[idx].0)));
+            .insert(Tile::new(2, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
         }
 
         drop(rng);
@@ -220,11 +222,11 @@ fn check_set_new_tile(matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE], matrix_clone: [[
 }
 
 fn get_matrix(tiles: &Vec<Tile>) -> [[Tile; BOARD_SIZE]; BOARD_SIZE] {
-    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (0, 0)); BOARD_SIZE]; BOARD_SIZE];
+    let mut matrix: [[Tile; BOARD_SIZE]; BOARD_SIZE] = [[Tile::new(0, (1, 0)); BOARD_SIZE]; BOARD_SIZE];
 
     for tile in tiles {
         matrix[tile.pos.1 as usize][tile.pos.0 as usize] = *tile;
     }
-    
+
     matrix
 }
