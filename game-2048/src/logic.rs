@@ -13,6 +13,14 @@ impl Logic {
         for tile in tiles {
             matrix[tile.pos.1 as usize][tile.pos.0 as usize] = *tile;
         }
+
+        for i in 0..matrix.len() {
+            for j in 0..matrix.len() {
+                if matrix[i][j].num == 0 {
+                    matrix[i][j].pos = (j, i);
+                }
+            }
+        }
     
         matrix
     }

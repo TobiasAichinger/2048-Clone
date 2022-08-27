@@ -180,7 +180,7 @@ fn spawn_random_tile(
             },
             ..default()
         })
-        .insert(Tile::new(path.remove(0).to_digit(10).unwrap() as i32, (positions[idx].1, matrix.len() - 1 - positions[idx].1)));
+        .insert(Tile::new(path.remove(0).to_digit(10).unwrap() as i32, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
 
         drop(rng);
     }
