@@ -6,11 +6,14 @@ impl Logic {
     pub fn merge(matrix: &mut [[Tile; super::BOARD]; super::BOARD]) -> u16 {
         for i in 0..matrix.len() {
             for j in 0..matrix.len() {
-                if matrix[i][j].num != 0 {
+                if matrix[i][j].num != 0 && j + 1 <= matrix.len() - 1 {
                     matrix[i][j].pos = (j + 1, i);
+                    matrix[i][j + 1].num = matrix[i][j].num;
+                    matrix[i][j].num = 0;
                 }
             }
         }
+
         0
     }
 

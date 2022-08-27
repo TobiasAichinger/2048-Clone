@@ -116,14 +116,38 @@ fn tile_system(
 
     let matrix_clone: [[Tile; 4]; 4] = matrix.clone();
 
+    //
+    // Merge the matrix and adding the tiles that combined to the score
+    //
     for mut score in score_query.iter_mut() {
-        score.0 += Logic::merge(&mut matrix); // merge score later
+        score.0 += Logic::merge(&mut matrix);
     }
 
     new_tile = Logic::check_set_new_tile(matrix, matrix_clone);
 
+    println!("{:?} \n", new_tile);
+
+    for i in 0..matrix.len() {
+        for j in 0..matrix[i].len() {
+            print!("{:?}", matrix[i][j].num);
+        }
+        println!();
+    }
+
+    println!();
+
     if new_tile.0 {
         spawn_random_tile(commands, materials, matrix, new_tile.1);
+
+        for (_, mut tile) in query.iter_mut() {
+            for i in 0..matrix.len() {
+                for j in 0..matrix.len() {
+                    if matrix[i][j].id == tile.id {
+                        tile.pos = matrix[i][j].pos;
+                    }
+                }
+            }
+        }
     }
 }
 
