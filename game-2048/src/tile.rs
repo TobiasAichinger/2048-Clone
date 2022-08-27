@@ -27,13 +27,15 @@ struct Square;
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Tile {
+    pub id: u8,
     pub num: i32,
     pub pos: (usize, usize)
 }
 
 impl Tile {
-    pub fn new(num: i32, pos: (usize, usize)) -> Tile {
+    pub fn new(id: u8, num: i32, pos: (usize, usize)) -> Tile {
         Tile {
+            id,
             num,
             pos,
         }
@@ -78,13 +80,13 @@ fn tile_system(
 ) {
     if !keyboard_input.any_just_released([KeyCode::W, KeyCode::A, KeyCode::S, KeyCode::D, KeyCode::Down, KeyCode::Up, KeyCode::Left, KeyCode::Right]) {
         if query.is_empty() {
-            spawn_random_tile(commands, materials, Logic::get_matrix(&vec![]));
+            spawn_random_tile(commands, materials, Logic::get_matrix(&vec![]), 1);
         }
 
         return;
     }
 
-    let new_tile: bool;
+    let new_tile: (bool, u8);
     let mut tiles: Vec<Tile> = vec![];
     query.iter().for_each( | (_, t) | tiles.push(*t));
     let mut matrix: [[Tile; super::BOARD]; super::BOARD];
@@ -115,13 +117,13 @@ fn tile_system(
     let matrix_clone: [[Tile; 4]; 4] = matrix.clone();
 
     for mut score in score_query.iter_mut() {
-        score.0 += 1; // merge score later
+        score.0 += Logic::merge(&mut matrix); // merge score later
     }
 
     new_tile = Logic::check_set_new_tile(matrix, matrix_clone);
 
-    if new_tile {
-        spawn_random_tile(commands, materials, matrix);
+    if new_tile.0 {
+        spawn_random_tile(commands, materials, matrix, new_tile.1);
     }
 }
 
@@ -142,7 +144,8 @@ fn move_tiles(
 fn spawn_random_tile(
     mut commands: Commands,
     materials: Res<AssetServer>,
-    matrix: [[Tile; super::BOARD]; super::BOARD]
+    matrix: [[Tile; super::BOARD]; super::BOARD],
+    id: u8
 ) {
     let mut positions: Vec<(usize, usize)> = Vec::new();
     let mut rng = rand::thread_rng();
@@ -180,7 +183,7 @@ fn spawn_random_tile(
             },
             ..default()
         })
-        .insert(Tile::new(path.remove(0).to_digit(10).unwrap() as i32, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
+        .insert(Tile::new(id, path.remove(0).to_digit(10).unwrap() as i32, (positions[idx].0, matrix.len() - 1 - positions[idx].1)));
 
         drop(rng);
     }
