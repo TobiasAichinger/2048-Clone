@@ -7,15 +7,10 @@ mod menu;
 mod ai;
 mod logic;
 
+use states::Game;
+
 const BOARD: usize = 4;
 const BACKGROUND_COLOR: Color = Color::rgb(250.0 / 255.0, 248.0 / 255.0, 239.0 / 255.0);
-
-use tile::TilePlugin;
-use states::GameState;
-use menu::MenuPlugin;
-use score::ScorePlugin;
-use ai::AiPlugin;
-
 const OFFSET: f32 = (-(4 as f32 / 2.0 * SQUARE_SIZE)) + SQUARE_SIZE / 2.;
 const SQUARE_SIZE: f32 = 75.0;
 
@@ -28,11 +23,6 @@ fn main() {
         height: 500.0,
         ..default()
     })
-    .add_state(GameState::Menu)
-    .add_plugins(DefaultPlugins)
-    .add_plugin(MenuPlugin)
-    .add_plugin(ScorePlugin)
-    .add_plugin(TilePlugin)  
-    .add_plugin(AiPlugin)  
+    .add_plugin(Game)
     .run();
 }
