@@ -123,6 +123,8 @@ fn tile_system(
         score.0 += Logic::merge(&mut matrix);
     }
 
+    /// Checks if there is a need to set a new tile
+    /// 
     new_tile = Logic::check_set_new_tile(matrix, matrix_clone);
 
     println!("{:?} \n", new_tile);
@@ -189,13 +191,11 @@ fn spawn_random_tile(
             super::OFFSET + positions[idx].1 as f32 * (super::SQUARE_SIZE),
         );   
 
-        let mut path: String;
-
-        if rng.gen_range(0..10) == 9 {
+        let mut path: String = if rng.gen_range(0..10) == 9 {
             path = "4.png".to_string();
         } else {
             path = "2.png".to_string();
-        }
+        };
 
         commands
         .spawn_bundle(SpriteBundle {
