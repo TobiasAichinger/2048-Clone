@@ -123,8 +123,8 @@ fn tile_system(
         score.0 += Logic::merge(&mut matrix);
     }
 
-    /// Checks if there is a need to set a new tile
-    /// 
+    // Checks if there is a need to set a new tile
+    //
     new_tile = Logic::check_set_new_tile(matrix, matrix_clone);
 
     println!("{:?} \n", new_tile);
@@ -192,9 +192,9 @@ fn spawn_random_tile(
         );   
 
         let mut path: String = if rng.gen_range(0..10) == 9 {
-            path = "4.png".to_string();
+            "4.png".to_string()
         } else {
-            path = "2.png".to_string();
+            "2.png".to_string()
         };
 
         commands
