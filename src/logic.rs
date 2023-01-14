@@ -1,4 +1,5 @@
 use crate::direction::Direction;
+use rand::prelude::*;
 
 pub struct Logic;
 
@@ -107,12 +108,41 @@ impl Logic {
         }
     }
 
+    fn new(board: &mut super::Board) {
+        let mut open: Vec<(usize,usize)> = Vec::new();
+        let mut rnd = rand::thread_rng();
+
+        for i in 0..board.len() {
+            for j in 0..board[i].len() {
+                if board[i][j] == 0 { open.push((i,j)); }
+            }
+        }
+
+        let new: u16 = match rnd.gen_range(0..10) {
+            9 => 4,
+            _ => 2,
+        };
+
+        open.shuffle(&mut rnd);
+        board[open[0].0][open[0].1] = new;
+    }
+
     pub fn update(board: &mut super::Board, dir: Direction) -> u16 {
+        let sum: u16 = board
+            .iter()
+            .map(|sl| 
+                sl
+                    .iter()
+                    .map(|e| e)
+                .sum::<u16>())
+            .sum::<u16>();
+        
         Logic::push(board, &dir);
         Logic::merge(board, &dir);
         Logic::push(board, &dir);
+        Logic::new(board);
 
-        board.iter().map(|sl| sl.iter().map(|e| e).sum::<u16>()).sum::<u16>()
+        sum
     }
 
     pub fn get_direction(line: &str) -> Direction {
@@ -122,6 +152,15 @@ impl Logic {
             "left" | "l" => Direction::Left,
             "right" | "r" => Direction::Right,
             _ => Direction::Invalid,
+        }
+    }
+
+    pub fn show(board: &super::Board) {
+        for i in 0..board.len() {
+            for j in 0..board.len() {
+                print!("{:?}", board[i][j]);
+            }
+            println!();
         }
     }
 }

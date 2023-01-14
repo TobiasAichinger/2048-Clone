@@ -29,11 +29,6 @@ fn main() {
         }
 
         Logic::update(&mut board, dir);
-        for i in 0..board.len() {
-            for j in 0..board.len() {
-                print!("{:?}", board[i][j]);
-            }
-            println!();
-        }
+        Logic::show(&board);
     }
 }
