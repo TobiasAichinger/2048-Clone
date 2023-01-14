@@ -136,11 +136,18 @@ impl Logic {
                     .map(|e| e)
                 .sum::<u16>())
             .sum::<u16>();
-        
+        let clone = board.clone();
+
         Logic::push(board, &dir);
         Logic::merge(board, &dir);
         Logic::push(board, &dir);
-        Logic::new(board);
+
+        for i in 0..clone.len() {
+            if clone[i] != board[i] {
+                Logic::new(board);
+                break;
+            }
+        }
 
         sum
     }
@@ -157,10 +164,13 @@ impl Logic {
 
     pub fn show(board: &super::Board) {
         for i in 0..board.len() {
+            println!("-----------------------------");
+            print!("|");
             for j in 0..board.len() {
-                print!("{:?}", board[i][j]);
+                print!("{:>5} |", board[i][j]);
             }
             println!();
         }
+        println!("-----------------------------");
     }
 }
