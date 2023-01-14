@@ -4,6 +4,10 @@ use rand::prelude::*;
 pub struct Logic;
 
 impl Logic {
+    pub fn start(board: &mut super::Board) {
+        Logic::new(board);
+    }
+
     fn merge(board: &mut super::Board, dir: &Direction) {
         match dir {
             Direction::Up => {
@@ -18,10 +22,11 @@ impl Logic {
             },
             Direction::Down => {
                 for i in 1..board.len() {
+                    Logic::show(&board);
                     for j in 0..board.len() {
                         if board[board.len()-i][j] == board[board.len()-i-1][j] {
-                            board[board.len()-i-1][j] *= 2;
-                            board[board.len()-i][j] = 0;
+                            board[board.len()-i][j] *= 2;
+                            board[board.len()-i-1][j] = 0;
                         }
                     }
                 }
@@ -40,8 +45,8 @@ impl Logic {
                 for i in 1..board.len() {
                     for j in 0..board.len() {
                         if board[j][board.len()-i] == board[j][board.len()-i-1] {
-                            board[j][board.len()-i-1] *= 2;
-                            board[j][board.len()-i] = 0;
+                            board[j][board.len()-i] *= 2;
+                            board[j][board.len()-i-1] = 0;
                         }
                     }
                 }

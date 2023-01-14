@@ -9,17 +9,13 @@ type Board = [[u16;SIZE];SIZE];
 
 fn main() {
     let mut board: Board = [[0;SIZE];SIZE];
-    board[1][3] = 2;
-    board[1][2] = 2;
-    board[1][0] = 2;
-    board[2][1] = 2;
-    board[1][1] = 2;
-    board[0][1] = 2;
-    board[3][1] = 2;
     let mut line: String = String::new();
+    Logic::start(&mut board);
 
     loop {
+        Logic::show(&board);
         line.clear();
+
         std::io::stdin().read_line(&mut line).unwrap();
         let dir: Direction = Logic::get_direction(line.trim());
 
@@ -29,6 +25,5 @@ fn main() {
         }
 
         Logic::update(&mut board, dir);
-        Logic::show(&board);
     }
 }
