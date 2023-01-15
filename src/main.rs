@@ -15,22 +15,27 @@ fn main() {
     let mut score: u16 = Game::start(&mut board);
 
     loop {
-        Game::show(&board);
+        print!("\x1B[2J");
+        Game::show(&board, score);
         line.clear();
 
-        print!("[Score: {score}]Enter direction [Down(d), Up(u), Right(r), Left(l)]: ");
+        print!("Enter direction [Down(d), Up(u), Right(r), Left(l), Exit(x)]: ");
         stdout().flush().unwrap();
 
         stdin().read_line(&mut line).unwrap();
         let dir: Direction = Game::get_direction(line.trim());
 
-        if dir == Direction::Invalid {
-            println!("Direction is invalid: {}", &line);
+        if line.trim().to_lowercase() == "x" {
+            break;
+        } else if dir == Direction::Invalid {
             continue;
         }
 
-        if let Some(new) = Game::update(&mut board, dir) {
+        if let Some(new) = Game::update(&mut board, &dir) {
             score = new;
+        } else {
+            println!("You lost: {score}");
+            break;
         }
     }
 }

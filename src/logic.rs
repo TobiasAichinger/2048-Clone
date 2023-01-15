@@ -6,51 +6,39 @@ pub struct Game;
 impl Game {
     pub fn start(board: &mut super::Board) -> u16 {
         Game::new(board);
-        Game::update(board, Direction::Invalid).unwrap()
+        0
     }
 
     fn merge(board: &mut super::Board, dir: &Direction) {
         match dir {
-            Direction::Up => {
-                for i in 1..board.len() {
+            Direction::Up => for i in 1..board.len() {
                     for j in 0..board.len() {
                         if board[i-1][j] == board[i][j] {
                             board[i-1][j] *= 2;
                             board[i][j] = 0;
                         }
-                    }
-                }
-            },
-            Direction::Down => {
-                for i in 1..board.len() {
+                    }},
+            Direction::Down => for i in 1..board.len() {
                     for j in 0..board.len() {
                         if board[board.len()-i][j] == board[board.len()-i-1][j] {
                             board[board.len()-i][j] *= 2;
                             board[board.len()-i-1][j] = 0;
                         }
-                    }
-                }
-            },
-            Direction::Left => {
-                for i in 1..board.len() {
+                    }},
+            Direction::Left => for i in 1..board.len() {
                     for j in 0..board.len() {
                         if board[j][i-1] == board[j][i] {
                             board[j][i-1] *= 2;
                             board[j][i] = 0;
                         }
-                    }
-                }
-            },
-            Direction::Right => {
-                for i in 1..board.len() {
+                    }},
+            Direction::Right => for i in 1..board.len() {
                     for j in 0..board.len() {
                         if board[j][board.len()-i] == board[j][board.len()-i-1] {
                             board[j][board.len()-i] *= 2;
                             board[j][board.len()-i-1] = 0;
                         }
-                    }
-                }
-            },
+                    }},
             Direction::Invalid => (),
         }
     }
@@ -123,6 +111,10 @@ impl Game {
             }
         }
 
+        if open.len() == 0 {
+            return;
+        }
+
         let new: u16 = match rnd.gen_range(0..10) {
             9 => 4,
             _ => 2,
@@ -132,31 +124,58 @@ impl Game {
         board[open[0].0][open[0].1] = new;
     }
 
-    pub fn update(board: &mut super::Board, dir: Direction) -> Option<u16> {
-        let sum: u16 = board
+    pub fn update(board: &mut super::Board, dir: &Direction) -> Option<u16> {
+        Game::push(board, dir);
+        Game::merge(board, dir);
+        Game::push(board, dir);
+
+        if Game::is_lost(board) {
+            return None;
+        } else {
+            Game::new(board);
+        }
+
+        Some(board
             .iter()
             .map(|sl| 
                 sl
                     .iter()
                     .map(|e| e)
                 .sum::<u16>())
-            .sum::<u16>();
-        let clone = board.clone();
+            .sum::<u16>())
+    }
 
-        Game::push(board, &dir);
-        Game::merge(board, &dir);
-        Game::push(board, &dir);
+    fn is_lost(board: &super::Board) -> bool {
+        let mut clone = board.clone();
+        let dirs: &[Direction] = &[Direction::Down, Direction::Up, Direction::Left, Direction::Right];
 
-        for i in 0..clone.len() {
-            if clone[i] != board[i] {
-                Game::new(board);
-                break;
+        for dir in dirs {
+            Game::push(&mut clone, dir);
+        
+            if Game::is_different(board, &clone) {
+                return false;
+            }
+
+            Game::merge(&mut clone, dir);
+
+            if Game::is_different(board, &clone) {
+                return false;
             }
         }
 
-        Some(sum)
+        true
     }
 
+    fn is_different(board: &super::Board, clone: &super::Board) -> bool {
+        for i in 0..clone.len() {
+            if clone[i] != board[i] {
+                return true;
+            }
+        }
+
+        false
+    }
+    
     pub fn get_direction(line: &str) -> Direction {
         match line.to_lowercase().as_str() {
             "up" | "u" => Direction::Up,
@@ -167,9 +186,10 @@ impl Game {
         }
     }
 
-    pub fn show(board: &super::Board) {
+    pub fn show(board: &super::Board, score: u16) {
+        println!("\x1B[90mScore: {:>20}", score);
         for i in 0..board.len() {
-            println!("\x1B[90m-----------------------------");
+            println!("-----------------------------");
             print!("|");
             for j in 0..board.len() {
                 match board[i][j] {
