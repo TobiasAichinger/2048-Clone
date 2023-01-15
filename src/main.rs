@@ -17,10 +17,6 @@ fn main() {
     let mut line: String = String::new();
     let mut score: u16 = Game::start(&mut board);
 
-    board[0][0] = 2;
-    board[1][0] = 2;
-    board[2][0] = 2;
-
     loop {
         // Clears the terminal
         print!("\x1B[2J");

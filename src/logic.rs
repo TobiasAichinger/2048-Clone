@@ -133,14 +133,9 @@ impl Game {
         let dirs: &[Direction] = &[Direction::Down, Direction::Up, Direction::Left, Direction::Right];
 
         for dir in dirs {
+            Game::merge(&mut clone, dir);
             Game::push(&mut clone, dir);
         
-            if Game::is_different(board, &clone) {
-                return false;
-            }
-
-            Game::merge(&mut clone, dir);
-
             if Game::is_different(board, &clone) {
                 return false;
             }
