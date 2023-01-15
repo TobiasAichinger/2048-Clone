@@ -1,3 +1,7 @@
+// 2048 - Terminal, 15/01/2023
+// Logic: All functions needed for the game a stored here
+// (c) aichingert
+
 use crate::direction::Direction;
 use rand::prelude::*;
 
@@ -11,30 +15,22 @@ impl Game {
 
     fn merge(board: &mut super::Board, dir: &Direction) {
         match dir {
-            Direction::Up => for i in 1..board.len() {
+            Direction::Up | Direction::Left => for i in 1..board.len() {
                     for j in 0..board.len() {
-                        if board[i-1][j] == board[i][j] {
+                        if dir == &Direction::Up && board[i-1][j] == board[i][j] {
                             board[i-1][j] *= 2;
                             board[i][j] = 0;
-                        }
-                    }},
-            Direction::Down => for i in 1..board.len() {
-                    for j in 0..board.len() {
-                        if board[board.len()-i][j] == board[board.len()-i-1][j] {
-                            board[board.len()-i][j] *= 2;
-                            board[board.len()-i-1][j] = 0;
-                        }
-                    }},
-            Direction::Left => for i in 1..board.len() {
-                    for j in 0..board.len() {
-                        if board[j][i-1] == board[j][i] {
+                        } else if dir == &Direction::Left && board[j][i-1] == board[j][i] {
                             board[j][i-1] *= 2;
                             board[j][i] = 0;
                         }
                     }},
-            Direction::Right => for i in 1..board.len() {
+            Direction::Down | Direction::Right => for i in 1..board.len() {
                     for j in 0..board.len() {
-                        if board[j][board.len()-i] == board[j][board.len()-i-1] {
+                        if dir == &Direction::Down && board[board.len()-i][j] == board[board.len()-i-1][j] {
+                            board[board.len()-i][j] *= 2;
+                            board[board.len()-i-1][j] = 0;
+                        } else if dir == &Direction::Right && board[j][board.len()-i] == board[j][board.len()-i-1] {
                             board[j][board.len()-i] *= 2;
                             board[j][board.len()-i-1] = 0;
                         }
@@ -45,53 +41,39 @@ impl Game {
 
     fn push(board: &mut super::Board, dir: &Direction) {
         match dir {
-            Direction::Up => {
+            Direction::Up | Direction::Left => {
                 for i in 1..board.len() {
                     for j in 0..board.len() {
                         let mut y: usize = i;
                         while y > 0 {
-                            if board[y-1][j] != 0 { break; }
-                            board[y-1][j] = board[y][j];
-                            board[y][j] = 0;
+                            if dir == &Direction::Up {
+                                if board[y-1][j] != 0 { break; }
+                                board[y-1][j] = board[y][j];
+                                board[y][j] = 0;
+                            } else {
+                                if board[j][y-1] != 0 { break; }
+                                board[j][y-1] = board[j][y];
+                                board[j][y] = 0;
+                            }
                             y -= 1;
                         }
                     }
                 }
             },
-            Direction::Down => {
+            Direction::Down | Direction::Right => {
                 for i in 2..=board.len() {
                     for j in 0..board.len() {
                         let mut y: usize = board.len() - i;
                         while y < board.len()-1 {
-                            if board[y+1][j] != 0 { break; }
-                            board[y+1][j] = board[y][j];
-                            board[y][j] = 0;
-                            y += 1;
-                        }
-                    }
-                }
-            },
-            Direction::Left => {
-                for i in 1..board.len() {
-                    for j in 0..board.len() {
-                        let mut y: usize = i;
-                        while y > 0 {
-                            if board[j][y-1] != 0 { break; }
-                            board[j][y-1] = board[j][y];
-                            board[j][y] = 0;
-                            y -= 1;
-                        }
-                    }
-                }
-            },
-            Direction::Right => {
-                for i in 2..=board.len() {
-                    for j in 0..board.len() {
-                        let mut y: usize = board.len() - i;
-                        while y < board.len()-1 {
-                            if board[j][y+1] != 0 { break; }
-                            board[j][y+1] = board[j][y];
-                            board[j][y] = 0;
+                            if dir == &Direction::Down {
+                                if board[y+1][j] != 0 { break; }
+                                board[y+1][j] = board[y][j];
+                                board[y][j] = 0;
+                            } else {
+                                if board[j][y+1] != 0 { break; }
+                                board[j][y+1] = board[j][y];
+                                board[j][y] = 0;
+                            }
                             y += 1;
                         }
                     }
@@ -125,13 +107,14 @@ impl Game {
     }
 
     pub fn update(board: &mut super::Board, dir: &Direction) -> Option<u16> {
+        let clone = board.clone();
         Game::push(board, dir);
         Game::merge(board, dir);
         Game::push(board, dir);
 
         if Game::is_lost(board) {
             return None;
-        } else {
+        } else if Game::is_different(board, &clone) {
             Game::new(board);
         }
 
@@ -187,7 +170,7 @@ impl Game {
     }
 
     pub fn show(board: &super::Board, score: u16) {
-        println!("\x1B[90mScore: {:>20}", score);
+        println!("\x1B[90mScore: {:>20}",score);
         for i in 0..board.len() {
             println!("-----------------------------");
             print!("|");
