@@ -28,7 +28,7 @@ fn main() {
         stdout().flush().unwrap();
 
         stdin().read_line(&mut line).unwrap();
-        let dir: Direction = Game::get_direction(line.trim());
+        let dir: Direction = Direction::from_string(line.trim());
 
         if line.trim().to_lowercase() == "x" {
             break;

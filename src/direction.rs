@@ -10,3 +10,15 @@ pub enum Direction {
     Right,
     Invalid
 }
+
+impl Direction {
+    pub fn from_string(line: &str) -> Self {
+        match line.to_lowercase().as_str() {
+            "up" | "u" => Direction::Up,
+            "down" | "d" => Direction::Down,
+            "left" | "l" => Direction::Left,
+            "right" | "r" => Direction::Right,
+            _ => Direction::Invalid,
+        }
+    }
+}

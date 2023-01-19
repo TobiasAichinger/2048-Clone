@@ -1,5 +1,5 @@
 # 2048
-The popular and easy to play 2048 game implemented in Rust and in the Terminal (with culors)
+The popular and easy to play 2048 game implemented in Rust and in the Terminal (with colors)
 
 # What it looks like
 <img src="img/cli-2048.png" />

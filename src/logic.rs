@@ -154,16 +154,6 @@ impl Game {
         false
     }
     
-    pub fn get_direction(line: &str) -> Direction {
-        match line.to_lowercase().as_str() {
-            "up" | "u" => Direction::Up,
-            "down" | "d" => Direction::Down,
-            "left" | "l" => Direction::Left,
-            "right" | "r" => Direction::Right,
-            _ => Direction::Invalid,
-        }
-    }
-
     pub fn show(board: &super::Board, score: u16) {
         println!("\x1B[90mScore: {:>20}",score);
         for i in 0..board.len() {
