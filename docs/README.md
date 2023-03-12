@@ -1,8 +1,8 @@
 # 2048
-The popular and easy to play 2048 game implemented in Rust and in the Terminal (with colors)
+The popular and easy to play 2048 game implemented in Rust and in the Terminal using <a href="https://github.com/lemunozm/ruscii" target="_blank">ruscii<a/>
 
 # What it looks like
-<img src="img/cli-2048.png" />
+<img src="/docs/img/cli-2048.png" />
 
 ## Setup
 * install the rust compiler (you can download it on the official <a href="https://www.rust-lang.org/" traget="_blank">rust-lang<a/> site)
