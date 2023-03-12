@@ -1,4 +1,4 @@
-// 2048 - Terminal, 15/01/2023
+// 2048 - Terminal, 12/03/2023
 // Logic: All functions needed for the game a stored here
 // (c) aichingert
 
@@ -152,34 +152,5 @@ impl Game {
         }
 
         false
-    }
-    
-    pub fn show(board: &super::Board, score: u16) {
-        println!("\x1B[90mScore: {:>20}",score);
-        for i in 0..board.len() {
-            println!("-----------------------------");
-            print!("|");
-            for j in 0..board.len() {
-                match board[i][j] {
-                    0 => print!("\x1B[30m{:>5} \x1B[90m|", board[i][j]),
-                    2 => print!("\x1B[33m{:>5} \x1B[90m|", board[i][j]),
-                    4 => print!("\x1B[93m{:>5} \x1B[90m|", board[i][j]),
-                    8 => print!("\x1B[34m{:>5} \x1B[90m|", board[i][j]),
-                    16 => print!("\x1B[94m{:>5} \x1B[90m|", board[i][j]),
-                    32 => print!("\x1B[36m{:>5} \x1B[90m|", board[i][j]),
-                    64 => print!("\x1B[96m{:>5} \x1B[90m|", board[i][j]),
-                    128 => print!("\x1B[36m{:>5} \x1B[90m|", board[i][j]),
-                    256 => print!("\x1B[96m{:>5} \x1B[90m|", board[i][j]),
-                    512 => print!("\x1B[32m{:>5} \x1B[90m|", board[i][j]),
-                    1024 => print!("\x1B[92m{:>5} \x1B[90m|", board[i][j]),
-                    2048 => print!("\x1B[35m{:>5} \x1B[90m|", board[i][j]),
-                    4096 => print!("\x1B[95m{:>5} \x1B[90m|", board[i][j]),
-                    _ => panic!("Number too high!")
-                };
-            }
-            println!();
-        }
-        println!("\x1B[90m-----------------------------");
-        print!("\x1B[0m");
     }
 }
